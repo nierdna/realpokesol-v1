@@ -75,20 +75,33 @@ export class SiwsService {
    */
   private parseMessage(message: string): SiwsMessage | null {
     try {
+      this.logger.log('Parsing SIWS message:', message);
       const lines = message.split('\n');
+      this.logger.log('Message lines:', lines);
       const parsed: any = {};
 
       // First line should be the statement
       if (!lines[0] || !lines[0].includes('wants you to sign in')) {
+        this.logger.error('Invalid first line:', lines[0]);
         return null;
       }
 
-      // Extract wallet from first line
-      const walletMatch = lines[0].match(/sign in with your Solana account:\s*([A-Za-z0-9]+)/);
+      // Check if wallet is on the same line or next line
+      let walletMatch = lines[0].match(/sign in with your Solana account:\s*([A-Za-z0-9]+)/);
+      if (!walletMatch && lines[1]) {
+        // Try to find wallet on the second line
+        const walletLine = lines[1].trim();
+        if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(walletLine)) {
+          walletMatch = ['', walletLine]; // Fake match array format
+        }
+      }
       if (!walletMatch) return null;
 
       // Parse key-value pairs
-      for (let i = 1; i < lines.length; i++) {
+      // Start from line 2 if wallet is on separate line, otherwise line 1
+      const startLine = lines[1] && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(lines[1].trim()) ? 2 : 1;
+
+      for (let i = startLine; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
 
@@ -123,6 +136,7 @@ export class SiwsService {
         }
       }
 
+      this.logger.log('Parsed message:', parsed);
       return parsed as SiwsMessage;
     } catch (error) {
       this.logger.error('Message parsing error:', error);

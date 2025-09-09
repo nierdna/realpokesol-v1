@@ -20,11 +20,11 @@ export class NonceService {
   /**
    * Generate a new nonce for the given wallet
    */
-  generateNonce(wallet: string): NonceResponse {
+  generateNonce(wallet: string, customNonce?: string): NonceResponse {
     // Invalidate any existing nonce for this wallet
     this.invalidateWalletNonces(wallet);
 
-    const nonce = randomUUID();
+    const nonce = customNonce || randomUUID();
     const now = Date.now();
     const expiresAt = now + this.nonceTtlMs;
 

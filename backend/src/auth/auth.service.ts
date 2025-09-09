@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import { NonceService } from './nonce.service';
-import { SiwsService } from './siws.service';
+import { SimpleAuthService } from './simple-auth.service';
 import { SiwsRequest, SiwsResponse, SessionRecord } from './interfaces/nonce.interface';
 import type { IUserRepository } from '../storage/ports/user-repository.interface';
 import { User } from '../storage/ports/user-repository.interface';
@@ -18,7 +18,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private nonceService: NonceService,
-    private siwsService: SiwsService,
+    private simpleAuthService: SimpleAuthService,
     @Inject(STORAGE_TOKENS.UserRepository)
     private userRepository: IUserRepository,
   ) {
@@ -27,29 +27,44 @@ export class AuthService {
   }
 
   /**
-   * Generate nonce for wallet
+   * Generate simple auth challenge for wallet
    */
   generateNonce(wallet: string) {
-    return this.nonceService.generateNonce(wallet);
+    const challenge = this.simpleAuthService.generateChallenge(wallet);
+    
+    // Store nonce for validation later
+    this.nonceService.generateNonce(wallet, challenge.nonce);
+    
+    return {
+      nonce: challenge.nonce,
+      domain: this.configService.get<string>('DOMAIN', 'pokemon-arena.local'),
+      statement: 'Sign in to Pokémon Summon Arena',
+      message: challenge.message,
+      issuedAt: challenge.issuedAt,
+      expirationTime: challenge.expirationTime,
+    };
   }
 
   /**
-   * Verify SIWS and issue JWT token
+   * Verify simple auth and issue JWT token
    */
   async verifySiws(siwsRequest: SiwsRequest): Promise<SiwsResponse> {
     const { wallet, message, signature } = siwsRequest;
 
-    // 1. Verify SIWS signature and message
-    const siwsResult = this.siwsService.verifySiws(wallet, message, signature);
-    if (!siwsResult.valid) {
-      throw new Error(`SIWS verification failed: ${siwsResult.reason}`);
+    // 1. Verify simple auth signature and message
+    const authResult = this.simpleAuthService.verifySignature(wallet, message, signature);
+    if (!authResult.valid) {
+      throw new Error(`Simple auth verification failed: ${authResult.reason}`);
     }
 
-    // 2. Validate and consume nonce
-    const nonceResult = this.nonceService.validateAndConsumeNonce(
-      siwsResult.parsedMessage!.nonce,
-      wallet
-    );
+    // 2. Extract nonce from message and validate
+    const nonceMatch = message.match(/Nonce: ([a-f0-9]+)/);
+    if (!nonceMatch) {
+      throw new Error('Nonce not found in message');
+    }
+    
+    const nonce = nonceMatch[1];
+    const nonceResult = this.nonceService.validateAndConsumeNonce(nonce, wallet);
     if (!nonceResult.valid) {
       throw new Error(`Nonce validation failed: ${nonceResult.reason}`);
     }
