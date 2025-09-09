@@ -1,0 +1,116 @@
+---
+name: code-review-guidelines
+description: Code Review Guidelines for the Pumpfun Execution Engine
+keywords: ["review", "code review", "inspect", "check", "evaluate"]
+globs: ["**/*.ts", "**/*.js"]
+alwaysApply: false
+---
+# Code Review Guidelines / Hướng Dẫn Review Code
+
+## 🔍 Khi nhận được request review code, review theo các tiêu chí sau:
+
+### 🔹 Kỹ thuật (Technical correctness)
+
+**Business Logic:**
+- ✅ Đúng business logic? / Is the business logic correct?
+- ✅ Xử lý hết edge case chưa? / Are all edge cases handled?
+- ✅ Test coverage có đầy đủ? / Is test coverage comprehensive?
+
+**Implementation:**
+- ✅ Code có chạy được không? / Does the code actually work?
+- ✅ Có lỗi runtime không? / Any runtime errors?
+- ✅ Error handling có đầy đủ? / Is error handling comprehensive?
+
+### 🔹 Chất lượng code (Code quality & maintainability)
+
+**Readability & Naming:**
+- ✅ Đọc dễ hiểu, đặt tên rõ nghĩa? / Is code readable with clear naming?
+- ✅ Tránh hard-code? / Avoid hard-coded values?
+- ✅ Tuân thủ coding convention/team style guide? / Follows coding conventions?
+
+**Code Structure:**
+- ✅ Có lặp code không, có thể refactor không? / Any code duplication? Can it be refactored?
+- ✅ Functions có single responsibility không? / Do functions have single responsibility?
+- ✅ Có magic numbers/strings không? / Any magic numbers or strings?
+
+### 🔹 Kiến trúc & hiệu năng (Architecture & performance)
+
+**Design Principles:**
+- ✅ Code có tách biệt concern đúng mức (SOLID)? / Does code properly separate concerns (SOLID)?
+- ✅ Design patterns có hợp lý? / Are design patterns appropriate?
+- ✅ Có vô tình tạo coupling, làm khó cho việc scale? / Any unintended coupling that hinders scaling?
+
+**Performance:**
+- ✅ Có lãng phí tài nguyên (query thừa, loop nặng, memory leak)? / Any resource waste (unnecessary queries, heavy loops, memory leaks)?
+- ✅ Time complexity có hợp lý? / Is time complexity reasonable?
+- ✅ Có async/await đúng cách không? / Proper async/await usage?
+
+### 🔹 Con người & tổ chức (Team & product alignment)
+
+**Project Alignment:**
+- ✅ Giải pháp có phù hợp với định hướng dự án? / Does solution align with project direction?
+- ✅ Không "nghệ sĩ" quá? / Not overly "artistic"?
+- ✅ Có follow existing patterns trong project? / Follows existing project patterns?
+
+**Maintainability:**
+- ✅ Người khác có thể dễ dàng tiếp nhận, maintain? / Can others easily understand and maintain?
+- ✅ Có góp phần cải thiện kiến thức team (comment, doc)? / Contributes to team knowledge (comments, docs)?
+- ✅ Có breaking changes không? / Any breaking changes?
+
+## 📝 Review Template
+
+```markdown
+## 🔍 Code Review
+
+### ✅ Điểm tốt / Strengths
+- [List positive aspects]
+
+### ⚠️ Cần cải thiện / Areas for Improvement
+- [List specific issues with line numbers if possible]
+
+### 🚨 Vấn đề nghiêm trọng / Critical Issues
+- [List blocking issues]
+
+### 💡 Gợi ý / Suggestions
+- [List improvement suggestions]
+
+### 📊 Đánh giá tổng thể / Overall Assessment
+- [Approve/Request Changes/Block with reasoning]
+```
+
+## 🎯 Review Checklist
+
+- [ ] Code compiles without errors
+- [ ] Business logic is correct
+- [ ] Edge cases are handled
+- [ ] Error handling is appropriate
+- [ ] Naming is clear and descriptive
+- [ ] No hard-coded values
+- [ ] Follows project conventions
+- [ ] No code duplication
+- [ ] Functions have single responsibility
+- [ ] SOLID principles followed
+- [ ] Performance is acceptable
+- [ ] No memory leaks
+- [ ] Proper async handling
+- [ ] Follows existing patterns
+- [ ] Well documented
+- [ ] Easy to maintain
+- [ ] No breaking changes
+
+## 🚀 Best Practices
+
+1. **Be constructive** - Focus on the code, not the person
+2. **Be specific** - Point to exact lines and explain why
+3. **Suggest alternatives** - Don't just point out problems
+4. **Consider context** - Understand the business requirements
+5. **Balance perfection vs. pragmatism** - Don't over-engineer
+6. **Focus on impact** - Prioritize issues by severity
+7. **Respect team velocity** - Don't block on minor issues
+
+## 📚 Related Resources
+
+- [TypeScript Guidelines](mdc:tsconfig.json)
+- [Project Structure](mdc:README.md)
+- [Package Management](mdc:package.json)
+

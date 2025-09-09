@@ -1,0 +1,11 @@
+Name,Level,Nature,Base_HP,Base_ATK,Base_DEF,Base_SPATK,Base_SPDEF,Base_SPD,Stat_HP,Stat_ATK,Stat_DEF,Stat_SPATK,Stat_SPDEF,Stat_SPD
+Creature-001,1,Swift (+SPD/-SPATK),102,40,48,93,102,102,13,5,5,5,7,7
+Creature-002,1,Quick (+SPD/-DEF),78,69,92,62,52,109,12,6,5,6,6,7
+Creature-003,1,Wise (+SPATK/-DEF),105,64,73,52,72,88,13,6,5,6,6,6
+Creature-004,1,Quick (+SPD/-DEF),62,92,91,87,54,120,12,6,5,6,6,7
+Creature-005,1,Mighty (+ATK/-SPDEF),112,116,87,68,81,65,13,7,6,6,5,6
+Creature-006,1,Calm (+SPDEF/-ATK),77,59,63,107,51,119,12,5,6,7,6,7
+Creature-007,1,Feral (+ATK/-SPDEF),62,95,94,102,55,106,12,6,6,7,5,7
+Creature-008,1,Bold (+DEF/-SPATK),109,57,94,40,81,67,13,6,6,4,6,6
+Creature-009,1,Mighty (+ATK/-SPDEF),107,57,104,101,70,70,13,6,7,7,5,6
+Creature-010,1,Aggressive (+ATK/-DEF),117,80,86,101,92,73,13,6,5,7,6,6

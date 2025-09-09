@@ -1,0 +1,56 @@
+---
+alwaysApply: true
+---
+
+# Pumpfun Development Guidelines
+
+## Architecture Principles
+
+1. **Clear Separation of Concerns**
+   - Core System handles logic and state management
+   - Execution Engine handles order matching and blockchain transactions
+   - Components communicate via standardized events
+
+2. **Event-Driven Architecture**
+   - All components communicate through events
+   - Events should be well-documented and versioned
+   - Event flow makes debugging and replaying easier
+
+3. **Scalability**
+   - Core and Execution Engine can scale independently
+   - Use Redis/NATS for efficient message passing
+
+4. **Extensibility**
+   - Easy to add new trading strategies
+   - Easy to add new execution modes
+
+5. **Real-time Updates**
+   - UI stays synchronized via wallet.update events
+
+## Development Standards
+
+1. **Code Organization**
+   - Use modular architecture (NestJS modules)
+   - Separate business logic from data access
+   - Use dependency injection for testability
+
+2. **Data Flow**
+   - Market data flows to both Core System and Execution Engine
+   - Order requests flow from Core to Execution Engine
+   - Order status updates flow from Execution Engine to Core
+   - Wallet updates flow from Core to UI
+
+3. **Security**
+   - For production, never store private keys in plaintext
+   - Use HashiCorp Vault or cloud KMS
+   - Implement proper authentication for all API endpoints
+
+4. **Error Handling**
+   - Log all errors with correlation IDs
+   - Implement retry policies for blockchain transactions
+   - Handle network interruptions gracefully
+
+5. **Testing**
+   - Unit test all critical components
+   - Test strategy execution with mock market data
+   - Test order execution flow end-to-end

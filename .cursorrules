@@ -1,0 +1,66 @@
+# Pokemon Summon Arena MVP - Cursor Rules
+
+## Project Context
+This is a Pokemon-themed PvP turn-based 2D game built with:
+- Frontend: Next.js 15 + Phaser 3 + Socket.io client + Solana wallet adapter
+- Backend: NestJS + Socket.io + Storage Adapter (Memory → Postgres)
+- Target: 2-3 weeks development, MVP with SIWS authentication
+
+## Development Plan Tracking
+ALWAYS check and reference `/DEVELOPMENT_PLAN.md` for:
+- Current phase and active tasks
+- Task completion status (⏳ Pending | 🚧 In Progress | ✅ Complete | ❌ Blocked)
+- Dependencies between phases
+- Timeline and milestones
+
+## Task Management Rules
+1. **Before starting any work**: Check DEVELOPMENT_PLAN.md for current phase
+2. **When completing a task**: Update the task status from ⏳ to ✅ in DEVELOPMENT_PLAN.md
+3. **When blocked**: Mark task as ❌ and add note in "Blocking Issues"
+4. **When starting new task**: Mark as 🚧 and update "Current Focus" section
+
+## Architecture Guidelines
+- Follow Storage Adapter pattern for database abstraction
+- Use NestJS DI for service dependencies
+- Implement event-driven architecture with Socket.io
+- Maintain separation between Memory (MVP) and Postgres (Final) adapters
+- Follow SIWS authentication flow strictly per SRS requirements
+
+## Code Standards
+- Use TypeScript everywhere
+- Follow NestJS best practices for backend
+- Use pnpm for package management
+- Implement proper error handling and logging
+- Add rate limiting and security measures from start
+
+## File Organization
+```
+pokemon-arena-mvp/
+├── backend/           # NestJS backend
+├── frontend/          # Next.js frontend  
+├── DEVELOPMENT_PLAN.md # Current plan and progress
+├── pokemon-summon-arena-mvp-srs-final.md # Full requirements
+└── .cursorrules       # This file
+```
+
+## Current Status Awareness
+Always check DEVELOPMENT_PLAN.md "Current Focus" section to understand:
+- Which phase we're currently in
+- What tasks are active
+- What's blocking progress
+- Next milestones
+
+## Progress Updates
+When you complete any task:
+1. Update the checkbox in DEVELOPMENT_PLAN.md ([ ] → [x])
+2. Change status emoji (⏳ → ✅)
+3. Update "Current Focus" if moving to new task/phase
+4. Add any notes about implementation decisions
+
+## SRS Reference
+Always reference `pokemon-summon-arena-mvp-srs-final.md` for:
+- Functional requirements (FR-*)
+- API specifications
+- Data models
+- Event protocols
+- Authentication flows

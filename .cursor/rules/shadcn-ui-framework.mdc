@@ -1,0 +1,74 @@
+---
+alwaysApply: true
+description: Always use MCP shadcn/ui for UI component development and design tasks
+---
+
+# shadcn/ui Framework Integration
+
+This project uses **shadcn/ui** as the primary UI component library. Always utilize the MCP shadcn tools for all UI-related tasks.
+
+## Required MCP Tools Usage
+
+For any UI development task, ALWAYS use these MCP shadcn tools:
+
+### 1. Component Discovery
+- Use `mcp_shadcn-ui_list_components` to explore available components
+- Use `mcp_shadcn-ui_get_component_metadata` for component specifications
+
+### 2. Component Implementation
+- Use `mcp_shadcn-ui_get_component` to get source code for components
+- Use `mcp_shadcn-ui_get_component_demo` to see usage examples
+- Use `mcp_shadcn-ui_list_blocks` and `mcp_shadcn-ui_get_block` for complex layouts
+
+### 3. Before Creating ANY UI Component
+1. **ALWAYS** search existing shadcn/ui components first using MCP tools
+2. Check if a suitable component already exists
+3. Get the component source code and demo
+4. Adapt the component to project needs (Next.js 15, Tailwind CSS 4, TypeScript)
+
+## Project Context
+- **Framework**: Next.js 15 with App Router
+- **Styling**: Tailwind CSS 4
+- **TypeScript**: Full TypeScript support
+- **Special Features**: Solana wallet integration
+- **Components Location**: `src/app/components/`
+
+## Implementation Guidelines
+
+### Component Creation Process
+1. Search shadcn/ui components using MCP tools
+2. Get component source and demo code
+3. Adapt for this project's structure:
+   - Place in `src/app/components/`
+   - Ensure TypeScript compatibility
+   - Integrate with existing Tailwind setup
+   - Consider Solana wallet context if relevant
+
+### Styling Standards
+- Use Tailwind CSS 4 utilities
+- Follow shadcn/ui design tokens and patterns
+- Maintain consistent spacing and typography
+- Use semantic color naming
+
+### Component Structure
+```typescript
+// Component template structure
+'use client'; // if client-side features needed
+
+import { ComponentProps } from 'react';
+// ... other imports
+
+interface ComponentNameProps extends ComponentProps<'element'> {
+  // component-specific props
+}
+
+export default function ComponentName({ ...props }: ComponentNameProps) {
+  // component implementation
+}
+```
+
+## Always Remember
+- **NEVER** create UI components from scratch without checking shadcn/ui first
+- **ALWAYS** use MCP shadcn tools before any UI implementation
+- Prioritize shadcn/ui components for consistency and accessibility
+- Adapt components to fit the memecoin/Solana theme while maintaining shadcn/ui patterns
