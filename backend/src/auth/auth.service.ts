@@ -1,34 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import { NonceService } from './nonce.service';
 import { SiwsService } from './siws.service';
 import { SiwsRequest, SiwsResponse, SessionRecord } from './interfaces/nonce.interface';
-
-export interface User {
-  id: string;
-  socketId?: string;
-  nickname: string;
-  walletAddress: string;
-  position: { x: number; y: number };
-  creature: {
-    name: string;
-    hp: number;
-    maxHp: number;
-    level: number;
-    isFainted: boolean;
-  };
-  isInBattle: boolean;
-  createdAt: Date;
-  lastLoginAt?: Date;
-}
+import type { IUserRepository } from '../storage/ports/user-repository.interface';
+import { User } from '../storage/ports/user-repository.interface';
+import { STORAGE_TOKENS } from '../storage/tokens';
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private users = new Map<string, User>();
-  private walletIndex = new Map<string, string>(); // wallet -> userId
   private sessions = new Map<string, SessionRecord>(); // jti -> session
 
   constructor(
@@ -36,6 +19,8 @@ export class AuthService {
     private configService: ConfigService,
     private nonceService: NonceService,
     private siwsService: SiwsService,
+    @Inject(STORAGE_TOKENS.UserRepository)
+    private userRepository: IUserRepository,
   ) {
     // Cleanup expired sessions every 10 minutes
     setInterval(() => this.cleanupExpiredSessions(), 10 * 60 * 1000);
@@ -70,12 +55,15 @@ export class AuthService {
     }
 
     // 3. Find or create user
-    let user = this.findUserByWallet(wallet);
+    let user = await this.userRepository.findByWallet(wallet);
     if (!user) {
-      user = this.createUser(wallet);
+      user = await this.createUser(wallet);
       this.logger.log(`New user created for wallet: ${wallet}`);
     } else {
-      user.lastLoginAt = new Date();
+      await this.userRepository.update({
+        id: user.id,
+        lastLoginAt: new Date(),
+      });
       this.logger.log(`Existing user logged in: ${user.id}`);
     }
 
@@ -128,7 +116,7 @@ export class AuthService {
         return null;
       }
 
-      return this.findUserById(session.userId);
+      return this.userRepository.findById(session.userId);
     } catch (error) {
       this.logger.warn(`Token verification failed: ${error.message}`);
       return null;
@@ -143,24 +131,9 @@ export class AuthService {
   }
 
   /**
-   * Find user by ID
-   */
-  findUserById(userId: string): User | null {
-    return this.users.get(userId) || null;
-  }
-
-  /**
-   * Find user by wallet address
-   */
-  findUserByWallet(wallet: string): User | null {
-    const userId = this.walletIndex.get(wallet);
-    return userId ? this.users.get(userId) || null : null;
-  }
-
-  /**
    * Create new user
    */
-  private createUser(wallet: string): User {
+  private async createUser(wallet: string): Promise<User> {
     const userId = randomUUID();
     const nickname = `Player${Math.floor(Math.random() * 9999).toString().padStart(4, '0')}`;
     
@@ -181,9 +154,7 @@ export class AuthService {
       lastLoginAt: new Date(),
     };
 
-    this.users.set(userId, user);
-    this.walletIndex.set(wallet, userId);
-
+    await this.userRepository.create(user);
     return user;
   }
 
@@ -221,11 +192,13 @@ export class AuthService {
   /**
    * Get auth stats for monitoring
    */
-  getStats() {
+  async getStats() {
     const nonceStats = this.nonceService.getStats();
+    const onlineUsers = await this.userRepository.listOnline();
+
     return {
       users: {
-        total: this.users.size,
+        online: onlineUsers.length,
       },
       sessions: {
         active: this.sessions.size,

@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  walletAddress String  @unique @map("wallet_address")
+  nickname     String
+  socketId     String?  @map("socket_id")
+  posX         Int      @default(0) @map("pos_x")
+  posY         Int      @default(0) @map("pos_y")
+  isInBattle   Boolean  @default(false) @map("is_in_battle")
+  createdAt    DateTime @default(now()) @map("created_at")
+  lastLoginAt  DateTime? @map("last_login_at")
+
+  // Relations
+  creature     UserCreature?
+  battlesAsPlayer1 Battle[] @relation("Player1")
+  battlesAsPlayer2 Battle[] @relation("Player2")
+  wonBattles   Battle[] @relation("Winner")
+
+  @@map("users")
+}
+
+model UserCreature {
+  userId     String  @id @map("user_id")
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  hp         Int
+  maxHp      Int      @map("max_hp")
+  level      Int
+  isFainted  Boolean @default(false) @map("is_fainted")
+
+  @@map("user_creatures")
+}
+
+model Battle {
+  id          String   @id @default(uuid())
+  player1Id   String   @map("player1_id")
+  player2Id   String   @map("player2_id")
+  currentTurn String   @map("current_turn")
+  turnCount   Int      @default(0) @map("turn_count")
+  state       String
+  winnerId    String?  @map("winner_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  player1     User     @relation("Player1", fields: [player1Id], references: [id], onDelete: Cascade)
+  player2     User     @relation("Player2", fields: [player2Id], references: [id], onDelete: Cascade)
+  winner      User?    @relation("Winner", fields: [winnerId], references: [id])
+  logs        BattleLog[]
+
+  @@map("battles")
+}
+
+model BattleLog {
+  id        BigInt   @id @default(autoincrement())
+  battleId  String   @map("battle_id")
+  seq       Int
+  line      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  battle    Battle   @relation(fields: [battleId], references: [id], onDelete: Cascade)
+
+  @@unique([battleId, seq])
+  @@map("battle_logs")
+}

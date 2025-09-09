@@ -53,26 +53,26 @@
 
 ---
 
-## Phase 3: Storage Adapter Pattern (2 ngày) ⏳
+## Phase 3: Storage Adapter Pattern (2 ngày) ✅
 
 ### 3.1 Adapter Design
-- [ ] Define repository interfaces (IUserRepository, IBattleRepository)
-- [ ] Unit of Work pattern interface
-- [ ] DI tokens và factory pattern
-- [ ] Storage Module configuration
+- [x] Define repository interfaces (IUserRepository, IBattleRepository)
+- [x] Unit of Work pattern interface
+- [x] DI tokens và factory pattern
+- [x] Storage Module configuration
 
 ### 3.2 Memory Adapter (MVP)
-- [ ] MemoryUserRepo implementation
-- [ ] MemoryBattleRepo implementation  
-- [ ] NoopUnitOfWork implementation
-- [ ] In-memory data structures (Maps/Sets)
+- [x] MemoryUserRepo implementation
+- [x] MemoryBattleRepo implementation  
+- [x] MemoryMatchQueue implementation
+- [x] In-memory data structures (Maps/Sets)
 
 ### 3.3 Postgres Adapter (Ready)
-- [ ] Prisma schema design
-- [ ] Database migrations
-- [ ] PgUserRepo stub implementation
-- [ ] PgBattleRepo stub implementation
-- [ ] Transaction support
+- [x] Prisma schema design
+- [x] Database migrations ready
+- [x] PgUserRepo stub implementation
+- [x] PgBattleRepo stub implementation
+- [x] Transaction support structure
 
 ---
 
@@ -199,7 +199,7 @@
 |-------|----------|--------|--------------|
 | Foundation & Setup | 3-4 ngày | ✅ | None |
 | Authentication | 2-3 ngày | ⏳ | Phase 1 |
-| Storage Adapter | 2 ngày | ⏳ | Phase 1 |
+| Storage Adapter | 2 ngày | ✅ | Phase 1 |
 | Core Services | 3-4 ngày | ⏳ | Phase 2,3 |
 | Socket Events | 2 ngày | ⏳ | Phase 4 |
 | Frontend Game | 4-5 ngày | ⏳ | Phase 2,5 |
@@ -212,12 +212,15 @@
 
 ## Current Focus
 
-**Active Phase**: Phase 2 - Authentication System 🚧
-**Current Task**: Ready to start SIWS implementation
-**Next Milestone**: Complete SIWS auth flow và JWT token system
+**Active Phase**: Phase 4 - Core Backend Services 🚧
+**Current Task**: Ready to implement UserService, LobbyService, MatchmakingService
+**Next Milestone**: Complete core domain services với Storage Adapter
 **Blocking Issues**: None
 
-**Phase 1 Completed**: ✅ Monorepo structure, NestJS backend, Next.js frontend, dependencies installed
+**Completed Phases**: 
+- ✅ **Phase 1**: Monorepo structure, NestJS backend, Next.js frontend, dependencies installed
+- ✅ **Phase 2**: SIWS authentication, JWT tokens, nonce management  
+- ✅ **Phase 3**: Storage Adapter pattern, Memory implementation, Postgres ready
 
 ---
 
