@@ -40,7 +40,14 @@ export class BattleScene extends Phaser.Scene {
     this.currentBattle = this.registry.get('currentBattle');
     if (!this.currentBattle) {
       console.error('No battle data found');
-      this.scene.start('LobbyScene');
+      // Check if scene manager is available before transitioning
+      if (this.scene && this.scene.manager) {
+        try {
+          this.scene.start('LobbyScene');
+        } catch (error) {
+          console.error('Error starting lobby scene:', error);
+        }
+      }
       return;
     }
 

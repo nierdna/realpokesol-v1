@@ -333,14 +333,32 @@ export class LobbyScene extends Phaser.Scene {
   private handleMatchFound(data: { roomId: string; opponent: { id: string; nickname: string; level: number } }) {
     console.log('✅ Match found:', data);
     
+    // Check if scene is still active and properly initialized
+    if (this.isDestroyed || !this.scene || !this.scene.manager || !this.scene.manager.isActive(this.scene.key)) {
+      console.warn('Scene inactive or not initialized, cannot start battle scene');
+      return;
+    }
+    
     // Store match data for battle scene
     this.registry.set('currentBattle', {
       roomId: data.roomId,
       opponent: data.opponent,
     });
 
+    // Reset queue state before transitioning
+    this.isInQueue = false;
+
     // Transition to battle scene
-    this.scene.start('BattleScene');
+    try {
+      this.scene.start('BattleScene');
+    } catch (error) {
+      console.error('Error starting battle scene:', error);
+      // Fallback: try to reset the UI state
+      if (this.matchButton) {
+        this.matchButton.setText('Find Match');
+        this.matchButton.setStyle({ backgroundColor: '#059669' });
+      }
+    }
   }
 
   private handleMatchTimeout() {
@@ -374,6 +392,12 @@ export class LobbyScene extends Phaser.Scene {
 
     // Mark scene as destroyed to prevent further event handling
     this.isDestroyed = true;
+
+    // If still in queue, leave it
+    if (this.isInQueue) {
+      socketManager.emit('match.leave');
+      this.isInQueue = false;
+    }
 
     // Cleanup socket listeners (remove all listeners for these events)
     socketManager.off('lobby.snapshot');
