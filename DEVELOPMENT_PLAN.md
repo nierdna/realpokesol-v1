@@ -108,19 +108,20 @@
 
 ---
 
-## Phase 5: Socket Events & Communication (2 ngày) ⏳
+## Phase 5: Socket Events & Communication (2 ngày) ✅
 
 ### 5.1 Event Handlers
-- [ ] Connection/disconnection handling
-- [ ] Lobby events (join, move, chat, emote)
-- [ ] Matchmaking events (join, leave, found, timeout)
-- [ ] Battle events (start, action, turn, end)
+- [x] Connection/disconnection handling
+- [x] Lobby events (join, move, chat, emote)
+- [x] Matchmaking events (join, leave, found, timeout)
+- [x] Battle events (start, action, turn, end)
 
 ### 5.2 Event Security
-- [ ] Rate limiting per event type
-- [ ] Input validation và sanitization
-- [ ] Idempotency cho battle actions
-- [ ] Backpressure handling
+- [x] Rate limiting per event type
+- [x] Input validation và sanitization
+- [x] Idempotency cho battle actions
+- [x] JWT authentication cho Socket handshake
+- [x] Single-session policy (kick duplicates)
 
 ---
 
@@ -201,7 +202,7 @@
 | Authentication | 2-3 ngày | ⏳ | Phase 1 |
 | Storage Adapter | 2 ngày | ✅ | Phase 1 |
 | Core Services | 3-4 ngày | ✅ | Phase 2,3 |
-| Socket Events | 2 ngày | ⏳ | Phase 4 |
+| Socket Events | 2 ngày | ✅ | Phase 4 |
 | Frontend Game | 4-5 ngày | ⏳ | Phase 2,5 |
 | Integration & Testing | 2-3 ngày | ⏳ | Phase 6 |
 | Polish & Deployment | 1-2 ngày | ⏳ | Phase 7 |
@@ -212,16 +213,17 @@
 
 ## Current Focus
 
-**Active Phase**: Phase 5 - Socket Events & Communication 🚧
-**Current Task**: Ready to implement Socket.io Gateway và event handlers
-**Next Milestone**: Complete real-time multiplayer communication
-**Blocking Issues**: Minor backend startup issue (build OK, services implemented)
+**Active Phase**: Phase 6 - Frontend Game Development 🚧
+**Current Task**: Ready to implement Next.js frontend với Phaser 3 và Solana wallet
+**Next Milestone**: Complete game scenes và real-time multiplayer UI
+**Blocking Issues**: None
 
 **Completed Phases**: 
 - ✅ **Phase 1**: Monorepo structure, NestJS backend, Next.js frontend, dependencies installed
 - ✅ **Phase 2**: SIWS authentication, JWT tokens, nonce management  
 - ✅ **Phase 3**: Storage Adapter pattern, Memory implementation, Postgres ready
 - ✅ **Phase 4**: Core services - UserService, LobbyService, MatchmakingService, BattleService
+- ✅ **Phase 5**: Socket.io Gateway, event handlers, JWT auth, real-time communication
 
 ---
 

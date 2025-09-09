@@ -8,6 +8,7 @@ import { UserModule } from './user/user.module';
 import { LobbyModule } from './lobby/lobby.module';
 import { MatchmakingModule } from './matchmaking/matchmaking.module';
 import { BattleModule } from './battle/battle.module';
+import { SocketModule } from './socket/socket.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { BattleModule } from './battle/battle.module';
     LobbyModule,
     MatchmakingModule,
     BattleModule,
+    SocketModule,
   ],
   controllers: [AppController],
   providers: [AppService],
