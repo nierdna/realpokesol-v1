@@ -52,7 +52,7 @@ export class AuthService {
     const { wallet, message, signature } = siwsRequest;
 
     // 1. Verify simple auth signature and message
-    const authResult = this.simpleAuthService.verifySignature(wallet, message, signature);
+    const authResult = await this.simpleAuthService.verifySignature(wallet, message, signature);
     if (!authResult.valid) {
       throw new Error(`Simple auth verification failed: ${authResult.reason}`);
     }

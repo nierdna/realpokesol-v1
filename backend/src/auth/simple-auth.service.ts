@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nacl from 'tweetnacl';
-const bs58 = require('bs58');
 
 export interface SimpleAuthChallenge {
   nonce: string;
@@ -39,12 +38,12 @@ export class SimpleAuthService {
   /**
    * Verify simple text message signature
    */
-  verifySignature(
+  async verifySignature(
     walletAddress: string,
     message: string,
     signature: string,
-    issuedAt?: string
-  ): { valid: boolean; reason?: string } {
+    issuedAt?: string,
+  ): Promise<{ valid: boolean; reason?: string }> {
     try {
       // 1. Validate message format
       if (!this.validateMessageFormat(message, walletAddress)) {
@@ -60,7 +59,11 @@ export class SimpleAuthService {
       }
 
       // 3. Verify Ed25519 signature
-      const signatureValid = this.verifyEd25519Signature(walletAddress, message, signature);
+      const signatureValid = await this.verifyEd25519Signature(
+        walletAddress,
+        message,
+        signature,
+      );
       if (!signatureValid) {
         return { valid: false, reason: 'INVALID_SIGNATURE' };
       }
@@ -149,7 +152,11 @@ export class SimpleAuthService {
   /**
    * Verify Ed25519 signature using nacl
    */
-  private verifyEd25519Signature(walletAddress: string, message: string, signature: string): boolean {
+  private async verifyEd25519Signature(
+    walletAddress: string,
+    message: string,
+    signature: string,
+  ): Promise<boolean> {
     try {
       this.logger.log(`Verifying signature for wallet: ${walletAddress}`);
       this.logger.log(`Raw message: ${JSON.stringify(message)}`);
@@ -166,8 +173,11 @@ export class SimpleAuthService {
       this.logger.log(`Cleaned message: ${JSON.stringify(cleanMessage)}`);
       this.logger.log(`Cleaned message length: ${cleanMessage.length}`);
 
+      // Dynamic import for bs58
+      const bs58 = await import('bs58');
+
       // Decode wallet public key from base58
-      const publicKey = bs58.decode(walletAddress);
+      const publicKey = bs58.default.decode(walletAddress);
       this.logger.log(`Public key length: ${publicKey.length}`);
 
       // Decode signature from base64
