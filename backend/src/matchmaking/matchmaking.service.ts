@@ -1,8 +1,11 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import type { IMatchQueue } from '../storage/ports/match-queue.interface';
 import { STORAGE_TOKENS } from '../storage/tokens';
 import { UserService } from '../user/user.service';
+import { MATCH_EVENTS } from './events/match.events';
+import type { MatchCreatedEvent, MatchTimeoutEvent, MatchQueueJoinedEvent } from './events/match.events';
 import { randomUUID } from 'crypto';
 
 export interface MatchResult {
@@ -34,6 +37,7 @@ export class MatchmakingService {
     private matchQueue: IMatchQueue,
     private userService: UserService,
     private configService: ConfigService,
+    private eventEmitter: EventEmitter2,
   ) {
     this.matchTimeoutMs = this.configService.get<number>('MATCH_TIMEOUT_SECONDS', 60) * 1000;
   }
@@ -59,10 +63,17 @@ export class MatchmakingService {
     this.setQueueTimeout(userId);
 
     const position = await this.matchQueue.getPosition(userId);
+    const queueStats = await this.matchQueue.getStats();
+
     this.logger.log(`User ${user.nickname} joined queue at position ${position}`);
 
-    // Try to find match
-    await this.tryCreateMatch();
+    // ✅ Emit queue joined event instead of calling tryCreateMatch
+    this.eventEmitter.emit(MATCH_EVENTS.MATCH_QUEUE_JOINED, {
+      type: 'MATCH_QUEUE_JOINED',
+      userId,
+      position: position || 0,
+      queueLength: queueStats.length,
+    } as MatchQueueJoinedEvent);
   }
 
   /**
@@ -78,6 +89,7 @@ export class MatchmakingService {
 
   /**
    * Try to create a match with fairness algorithm
+   * ✅ Now only called by external trigger, not internally
    */
   async tryCreateMatch(): Promise<MatchResult | null> {
     // Get next 2 players using fairness algorithm
@@ -130,6 +142,12 @@ export class MatchmakingService {
       `Match created: ${roomId} - ${player1.nickname} vs ${player2.nickname}`
     );
 
+    // ✅ Emit match created event
+    this.eventEmitter.emit(MATCH_EVENTS.MATCH_CREATED, {
+      type: 'MATCH_CREATED',
+      match: matchResult,
+    } as MatchCreatedEvent);
+
     return matchResult;
   }
 
@@ -141,6 +159,13 @@ export class MatchmakingService {
     
     const user = await this.userService.findById(userId);
     this.logger.log(`Queue timeout for user: ${user?.nickname || userId}`);
+
+    // ✅ Emit timeout event
+    this.eventEmitter.emit(MATCH_EVENTS.MATCH_TIMEOUT, {
+      type: 'MATCH_TIMEOUT',
+      userId,
+      reason: 'QUEUE_TIMEOUT',
+    } as MatchTimeoutEvent);
   }
 
   /**
@@ -187,6 +212,21 @@ export class MatchmakingService {
       queue: queueStats,
       activeTimeouts: this.queueTimeouts.size,
     };
+  }
+
+  /**
+   * ✅ NEW: Check for possible matches (called externally)
+   * This replaces the internal tryCreateMatch call in joinQueue
+   */
+  async checkForMatches(): Promise<void> {
+    // Try to create matches until queue is too small
+    while (true) {
+      const match = await this.tryCreateMatch();
+      if (!match) {
+        break; // No more matches possible
+      }
+      // Match created event already emitted in tryCreateMatch
+    }
   }
 
   /**

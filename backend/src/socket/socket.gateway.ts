@@ -8,15 +8,17 @@ import {
   OnGatewayDisconnect,
   OnGatewayInit,
 } from '@nestjs/websockets';
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { Server, Socket } from 'socket.io';
 import { ConfigService } from '@nestjs/config';
-import { SocketAuthGuard } from './auth.guard';
 import { AuthService } from '../auth/auth.service';
 import { UserService } from '../user/user.service';
 import { LobbyService } from '../lobby/lobby.service';
 import { MatchmakingService } from '../matchmaking/matchmaking.service';
 import { BattleService } from '../battle/battle.service';
+import { MATCH_EVENTS } from '../matchmaking/events/match.events';
+import type { MatchCreatedEvent, MatchTimeoutEvent, MatchQueueJoinedEvent } from '../matchmaking/events/match.events';
 
 interface AuthenticatedSocket extends Socket {
   data: {
@@ -96,6 +98,9 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       // Update active sessions
       this.activeSessions.set(user.id, client.id);
 
+      // ✅ FIX: Bind socket immediately on connection, not just on lobby.join
+      await this.userService.bindSocket(user.id, client.id);
+
       this.logger.log(`Socket authenticated: ${client.id} -> ${user.nickname} (${user.id})`);
       
       // Send initial connection success
@@ -148,7 +153,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     
     try {
       await this.lobbyService.handleJoin(userId);
-      await this.userService.bindSocket(userId, client.id);
+      // ✅ Socket already bound in handleConnection, no need to bind again
 
       // Join lobby room
       await client.join('lobby');
@@ -239,53 +244,11 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const userId = client.data.userId;
     
     try {
+      // ✅ Only join queue - no tryCreateMatch call
       await this.matchmakingService.joinQueue(userId);
       
-      // Try to create match immediately
-      const match = await this.matchmakingService.tryCreateMatch();
-      
-      if (match) {
-        // Notify both players
-        const player1Socket = this.getSocketByUserId(match.player1Id);
-        const player2Socket = this.getSocketByUserId(match.player2Id);
-
-        if (player1Socket && player2Socket) {
-          // Leave lobby room
-          player1Socket.leave('lobby');
-          player2Socket.leave('lobby');
-
-          // Join battle room
-          player1Socket.join(`battle-${match.roomId}`);
-          player2Socket.join(`battle-${match.roomId}`);
-
-          // Send match found
-          player1Socket.emit('match.found', {
-            roomId: match.roomId,
-            opponent: match.player2,
-          });
-          player2Socket.emit('match.found', {
-            roomId: match.roomId,
-            opponent: match.player1,
-          });
-
-          // Create battle
-          await this.battleService.createBattle(match.player1Id, match.player2Id, match.roomId);
-
-          // Send battle start
-          const battleState = await this.battleService.getBattleState(match.roomId);
-          this.server.to(`battle-${match.roomId}`).emit('battle.start', {
-            roomId: match.roomId,
-            battleState,
-          });
-        }
-      } else {
-        // Send queue joined confirmation
-        const position = await this.matchmakingService.getStats();
-        client.emit('match.queued', { 
-          position: position.queue.length,
-          estimatedWait: position.queue.averageWaitTime,
-        });
-      }
+      // ✅ Trigger match check asynchronously to avoid blocking
+      setImmediate(() => this.matchmakingService.checkForMatches());
 
     } catch (error) {
       this.logger.error(`Match join error: ${error.message}`);
@@ -368,6 +331,96 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   private getSocketByUserId(userId: string): Socket | null {
     const socketId = this.activeSessions.get(userId);
     return socketId ? this.server.sockets.sockets.get(socketId) || null : null;
+  }
+
+  // ==================== EVENT LISTENERS ====================
+
+  /**
+   * ✅ Handle match created event
+   */
+  @OnEvent(MATCH_EVENTS.MATCH_CREATED)
+  async handleMatchCreated(event: MatchCreatedEvent) {
+    const { match } = event;
+
+    try {
+      // Get sockets for both players
+      const player1Socket = this.getSocketByUserId(match.player1Id);
+      const player2Socket = this.getSocketByUserId(match.player2Id);
+
+      if (!player1Socket || !player2Socket) {
+        this.logger.error(`Cannot find sockets for match ${match.roomId}: p1=${!!player1Socket}, p2=${!!player2Socket}`);
+        // Cleanup match if sockets not found
+        await this.matchmakingService.cleanup(match.player1Id);
+        await this.matchmakingService.cleanup(match.player2Id);
+        return;
+      }
+
+      // Leave lobby room
+      player1Socket.leave('lobby');
+      player2Socket.leave('lobby');
+
+      // Join battle room
+      const battleRoom = `battle-${match.roomId}`;
+      player1Socket.join(battleRoom);
+      player2Socket.join(battleRoom);
+
+      // Send match found to both players
+      player1Socket.emit('match.found', {
+        roomId: match.roomId,
+        opponent: match.player2,
+      });
+      player2Socket.emit('match.found', {
+        roomId: match.roomId,
+        opponent: match.player1,
+      });
+
+      // Create battle
+      await this.battleService.createBattle(match.player1Id, match.player2Id, match.roomId);
+
+      // Send battle start
+      const battleState = await this.battleService.getBattleState(match.roomId);
+      this.server.to(battleRoom).emit('battle.start', {
+        roomId: match.roomId,
+        battleState,
+      });
+
+      this.logger.log(`✅ Match handled successfully: ${match.roomId}`);
+
+    } catch (error) {
+      this.logger.error(`Error handling match created: ${error.message}`);
+      // Cleanup on error
+      await this.matchmakingService.cleanup(match.player1Id);
+      await this.matchmakingService.cleanup(match.player2Id);
+    }
+  }
+
+  /**
+   * ✅ Handle queue joined event
+   */
+  @OnEvent(MATCH_EVENTS.MATCH_QUEUE_JOINED)
+  async handleQueueJoined(event: MatchQueueJoinedEvent) {
+    const socket = this.getSocketByUserId(event.userId);
+    if (socket) {
+      socket.emit('match.queued', {
+        position: event.position,
+        queueLength: event.queueLength,
+        estimatedWait: 0, // Can calculate based on historical data
+      });
+    }
+  }
+
+  /**
+   * ✅ Handle match timeout event
+   */
+  @OnEvent(MATCH_EVENTS.MATCH_TIMEOUT)
+  async handleMatchTimeout(event: MatchTimeoutEvent) {
+    const socket = this.getSocketByUserId(event.userId);
+    if (socket) {
+      socket.emit('match.timeout', {
+        reason: event.reason,
+        timestamp: new Date().toISOString(),
+      });
+    }
   }
 
   // ==================== ADMIN/DEBUG EVENTS ====================
