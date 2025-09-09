@@ -11,32 +11,32 @@
 
 ---
 
-## Phase 1: Foundation & Setup (3-4 ngày) ⏳
+## Phase 1: Foundation & Setup (3-4 ngày) ✅
 
 ### 1.1 Project Structure Setup
-- [ ] Tạo monorepo với `/backend` và `/frontend`
-- [ ] Setup pnpm workspace
-- [ ] Configure TypeScript, ESLint, Prettier
+- [x] Tạo monorepo với `/backend` và `/frontend`
+- [x] Setup pnpm workspace
+- [x] Configure TypeScript, ESLint, Prettier
 - [ ] Setup Docker Compose (optional)
-- [ ] Environment configuration
+- [x] Environment configuration
 
 ### 1.2 Backend Foundation
-- [ ] NestJS project initialization
-- [ ] Basic module structure (Auth, User, Lobby, Battle, Storage)
-- [ ] JWT configuration
-- [ ] Socket.io gateway setup
-- [ ] CORS và security configuration
+- [x] NestJS project initialization
+- [x] Basic module structure (Auth, User, Lobby, Battle, Storage)
+- [x] JWT configuration
+- [x] Socket.io gateway setup
+- [x] CORS và security configuration
 
 ### 1.3 Frontend Foundation  
-- [ ] Next.js 15 project setup
-- [ ] Phaser 3 integration
-- [ ] Solana wallet adapter setup
-- [ ] Basic routing (`/` và `/game`)
-- [ ] Socket.io client configuration
+- [x] Next.js 15 project setup
+- [x] Phaser 3 integration
+- [x] Solana wallet adapter setup
+- [x] Basic routing (`/` và `/game`)
+- [x] Socket.io client configuration
 
 ---
 
-## Phase 2: Authentication System (2-3 ngày) ⏳
+## Phase 2: Authentication System (2-3 ngày) 🚧
 
 ### 2.1 SIWS Implementation
 - [ ] Nonce generation endpoint (`GET /auth/nonce`)
@@ -197,7 +197,7 @@
 
 | Phase | Duration | Status | Dependencies |
 |-------|----------|--------|--------------|
-| Foundation & Setup | 3-4 ngày | ⏳ | None |
+| Foundation & Setup | 3-4 ngày | ✅ | None |
 | Authentication | 2-3 ngày | ⏳ | Phase 1 |
 | Storage Adapter | 2 ngày | ⏳ | Phase 1 |
 | Core Services | 3-4 ngày | ⏳ | Phase 2,3 |
@@ -212,9 +212,12 @@
 
 ## Current Focus
 
-**Active Phase**: Phase 1 - Foundation & Setup
-**Next Milestone**: Complete project structure và basic NestJS/Next.js setup
+**Active Phase**: Phase 2 - Authentication System 🚧
+**Current Task**: Ready to start SIWS implementation
+**Next Milestone**: Complete SIWS auth flow và JWT token system
 **Blocking Issues**: None
+
+**Phase 1 Completed**: ✅ Monorepo structure, NestJS backend, Next.js frontend, dependencies installed
 
 ---
 
