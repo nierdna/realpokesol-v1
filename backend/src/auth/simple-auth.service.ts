@@ -94,14 +94,23 @@ export class SimpleAuthService {
    */
   private validateMessageFormat(message: string, expectedWallet: string): boolean {
     try {
-      // Check if message contains expected components
-      return (
-        message.includes(this.appName) &&
-        message.includes('authenticate your wallet') &&
-        message.includes(`Wallet: ${expectedWallet}`) &&
-        message.includes('Nonce:') &&
-        message.includes('Time:')
+      // Clean up message first
+      const cleanMessage = message
+        .replace(/\\n/g, '\n')
+        .replace(/\\r/g, '\r')
+        .replace(/\\\\/g, '\\')
+        .trim();
+
+      // Check if message contains expected components (try both original and cleaned)
+      const checkMessage = (msg: string) => (
+        msg.includes(this.appName) &&
+        msg.includes('authenticate your wallet') &&
+        msg.includes(`Wallet: ${expectedWallet}`) &&
+        msg.includes('Nonce:') &&
+        msg.includes('Time:')
       );
+
+      return checkMessage(message) || checkMessage(cleanMessage);
     } catch (error) {
       this.logger.error('Message format validation error:', error);
       return false;
@@ -143,8 +152,19 @@ export class SimpleAuthService {
   private verifyEd25519Signature(walletAddress: string, message: string, signature: string): boolean {
     try {
       this.logger.log(`Verifying signature for wallet: ${walletAddress}`);
+      this.logger.log(`Raw message: ${JSON.stringify(message)}`);
       this.logger.log(`Message length: ${message.length}`);
       this.logger.log(`Signature: ${signature}`);
+
+      // Clean up message - handle escaped characters from frontend
+      const cleanMessage = message
+        .replace(/\\n/g, '\n')  // Replace \\n with actual newlines
+        .replace(/\\r/g, '\r')  // Replace \\r with actual carriage returns
+        .replace(/\\\\/g, '\\') // Replace \\\\ with single backslash
+        .trim();
+
+      this.logger.log(`Cleaned message: ${JSON.stringify(cleanMessage)}`);
+      this.logger.log(`Cleaned message length: ${cleanMessage.length}`);
 
       // Decode wallet public key from base58
       const publicKey = bs58.decode(walletAddress);
@@ -154,13 +174,19 @@ export class SimpleAuthService {
       const signatureBytes = Buffer.from(signature, 'base64');
       this.logger.log(`Signature bytes length: ${signatureBytes.length}`);
 
-      // Encode message as UTF-8
-      const messageBytes = new TextEncoder().encode(message);
-      this.logger.log(`Message bytes length: ${messageBytes.length}`);
+      // Try both original and cleaned message
+      const originalMessageBytes = new TextEncoder().encode(message);
+      const cleanedMessageBytes = new TextEncoder().encode(cleanMessage);
 
-      // Verify signature
-      const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKey);
-      this.logger.log(`Signature verification result: ${isValid}`);
+      // Try original message first
+      let isValid = nacl.sign.detached.verify(originalMessageBytes, signatureBytes, publicKey);
+      this.logger.log(`Original message verification: ${isValid}`);
+
+      // If original fails, try cleaned message
+      if (!isValid) {
+        isValid = nacl.sign.detached.verify(cleanedMessageBytes, signatureBytes, publicKey);
+        this.logger.log(`Cleaned message verification: ${isValid}`);
+      }
 
       return isValid;
     } catch (error) {
