@@ -23,6 +23,9 @@ export class BattleScene extends Phaser.Scene {
   private isMyTurn = false;
   private logLines: string[] = [];
 
+  // Scene destruction flag for cleanup
+  private isDestroyed = false;
+
   constructor() {
     super({ key: 'BattleScene' });
   }
@@ -201,22 +204,28 @@ export class BattleScene extends Phaser.Scene {
 
   private setupSocketListeners() {
     socketManager.on('battle.start', (data: unknown) => {
-      this.handleBattleStart(data as { roomId: string; battleState: BattleState });
+      if (!this.isDestroyed) {
+        this.handleBattleStart(data as { roomId: string; battleState: BattleState });
+      }
     });
     
     socketManager.on('battle.turn', (data: unknown) => {
-      this.handleBattleTurn(data as {
-        damage: number;
-        isCrit: boolean;
-        targetHp: number;
-        log: string;
-        currentTurnOwnerId: string;
-        nextTurnOwnerId: string;
-      });
+      if (!this.isDestroyed) {
+        this.handleBattleTurn(data as {
+          damage: number;
+          isCrit: boolean;
+          targetHp: number;
+          log: string;
+          currentTurnOwnerId: string;
+          nextTurnOwnerId: string;
+        });
+      }
     });
     
     socketManager.on('battle.end', (data: unknown) => {
-      this.handleBattleEnd(data as { winnerId: string; newLevels: { [userId: string]: number } });
+      if (!this.isDestroyed) {
+        this.handleBattleEnd(data as { winnerId: string; newLevels: { [userId: string]: number } });
+      }
     });
   }
 
@@ -260,18 +269,31 @@ export class BattleScene extends Phaser.Scene {
   private handleBattleEnd(data: { winnerId: string; newLevels: { [userId: string]: number } }) {
     console.log('🏆 Battle ended:', data);
     
+    // Check if scene is still active and properly initialized
+    if (this.isDestroyed || !this.scene || !this.scene.isActive || !this.scene.isActive()) {
+      console.warn('Scene inactive or not initialized, skipping battle end handling');
+      return;
+    }
+
     const user = this.registry.get('user');
     const isWinner = data.winnerId === user?.id;
     
     this.addLogLine(isWinner ? 'You won!' : 'You lost!');
     
-    this.actionButton.setVisible(false);
-    this.turnIndicator.setText(isWinner ? '🏆 Victory!' : '💀 Defeat!');
-    this.turnIndicator.setStyle({ color: isWinner ? '#10b981' : '#ef4444' });
+    if (this.actionButton) {
+      this.actionButton.setVisible(false);
+    }
+
+    if (this.turnIndicator) {
+      this.turnIndicator.setText(isWinner ? '🏆 Victory!' : '💀 Defeat!');
+      this.turnIndicator.setStyle({ color: isWinner ? '#10b981' : '#ef4444' });
+    }
 
     // Show return to lobby button after 3 seconds
     setTimeout(() => {
-      this.returnToLobby();
+      if (this.scene && this.scene.isActive && this.scene.isActive()) {
+        this.returnToLobby();
+      }
     }, 3000);
   }
 
@@ -280,6 +302,12 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private updateTurnIndicator() {
+    // Check if scene is still active and UI elements exist
+    if (this.isDestroyed || !this.scene || !this.scene.isActive || !this.scene.isActive() || !this.turnIndicator || !this.actionButton) {
+      console.warn('Scene inactive or UI elements not available, skipping turn indicator update');
+      return;
+    }
+
     const user = this.registry.get('user');
     this.isMyTurn = this.battleState.currentTurnOwnerId === user?.id;
     
@@ -308,6 +336,12 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private addLogLine(line: string) {
+    // Check if battleLog exists before updating
+    if (!this.battleLog) {
+      console.warn('BattleLog not available, skipping log update');
+      return;
+    }
+
     this.logLines.push(line);
     if (this.logLines.length > 5) {
       this.logLines.shift();
@@ -324,9 +358,15 @@ export class BattleScene extends Phaser.Scene {
   }
 
   shutdown() {
+    console.log('🧹 Shutting down BattleScene');
+
+    // Mark scene as destroyed to prevent further event handling
+    this.isDestroyed = true;
+
     // Cleanup socket listeners
     socketManager.off('battle.start');
     socketManager.off('battle.turn');
     socketManager.off('battle.end');
   }
+
 }

@@ -22,6 +22,9 @@ export class LobbyScene extends Phaser.Scene {
   private matchButton!: Phaser.GameObjects.Text;
   private isInQueue = false;
 
+  // Scene destruction flag for cleanup
+  private isDestroyed = false;
+
   constructor() {
     super({ key: 'LobbyScene' });
   }
@@ -134,28 +137,40 @@ export class LobbyScene extends Phaser.Scene {
   private setupSocketListeners() {
     // Lobby events
     socketManager.on('lobby.snapshot', (data: unknown) => {
-      this.handleLobbySnapshot(data as { users: LobbyUser[]; userPosition: { x: number; y: number } });
+      if (!this.isDestroyed) {
+        this.handleLobbySnapshot(data as { users: LobbyUser[]; userPosition: { x: number; y: number } });
+      }
     });
     
     socketManager.on('lobby.update', (data: unknown) => {
-      this.handleLobbyUpdate(data as { users: LobbyUser[] });
+      if (!this.isDestroyed) {
+        this.handleLobbyUpdate(data as { users: LobbyUser[] });
+      }
     });
     
     socketManager.on('lobby.position', (data: unknown) => {
-      this.handlePositionUpdate(data as { userId: string; x: number; y: number });
+      if (!this.isDestroyed) {
+        this.handlePositionUpdate(data as { userId: string; x: number; y: number });
+      }
     });
 
     // Match events
     socketManager.on('match.found', (data: unknown) => {
-      this.handleMatchFound(data as { roomId: string; opponent: { id: string; nickname: string; level: number } });
+      if (!this.isDestroyed) {
+        this.handleMatchFound(data as { roomId: string; opponent: { id: string; nickname: string; level: number } });
+      }
     });
     
     socketManager.on('match.timeout', () => {
-      this.handleMatchTimeout();
+      if (!this.isDestroyed) {
+        this.handleMatchTimeout();
+      }
     });
     
     socketManager.on('match.queued', (data: unknown) => {
-      this.handleMatchQueued(data as { position: number; estimatedWait: number });
+      if (!this.isDestroyed) {
+        this.handleMatchQueued(data as { position: number; estimatedWait: number });
+      }
     });
   }
 
@@ -184,28 +199,50 @@ export class LobbyScene extends Phaser.Scene {
   }
 
   private handleLobbySnapshot(data: { users: LobbyUser[]; userPosition: { x: number; y: number } }) {
-    // Update player position
-    this.player.setPosition(
-      this.scale.width / 2 + data.userPosition.x,
-      this.scale.height / 2 + data.userPosition.y
-    );
+    // Check if scene is still active and properly initialized
+    if (this.isDestroyed || !this.scene || !this.scene.isActive || !this.scene.isActive()) {
+      console.warn('Scene inactive or not initialized, skipping lobby snapshot update');
+      return;
+    }
+
+    // Update player position if player exists
+    if (this.player) {
+      this.player.setPosition(
+        this.scale.width / 2 + data.userPosition.x,
+        this.scale.height / 2 + data.userPosition.y
+      );
+    }
 
     // Update other players
     this.updatePlayerList(data.users);
   }
 
   private handleLobbyUpdate(data: { users: LobbyUser[] }) {
+    // Check if scene is still active and properly initialized
+    if (this.isDestroyed || !this.scene || !this.scene.isActive || !this.scene.isActive()) {
+      console.warn('Scene inactive or not initialized, skipping lobby update');
+      return;
+    }
+
     this.updatePlayerList(data.users);
   }
 
   private handlePositionUpdate(data: { userId: string; x: number; y: number }) {
+    // Check if scene is still active and properly initialized
+    if (this.isDestroyed || !this.scene || !this.scene.isActive || !this.scene.isActive()) {
+      console.warn('Scene inactive or not initialized, skipping position update');
+      return;
+    }
+
     const user = this.registry.get('user');
     if (data.userId === user?.id) {
-      // Update our player position
-      this.player.setPosition(
-        this.scale.width / 2 + data.x,
-        this.scale.height / 2 + data.y
-      );
+      // Update our player position if player exists
+      if (this.player) {
+        this.player.setPosition(
+          this.scale.width / 2 + data.x,
+          this.scale.height / 2 + data.y
+        );
+      }
     } else {
       // Update other player position
       const otherPlayer = this.otherPlayers.get(data.userId);
@@ -219,6 +256,12 @@ export class LobbyScene extends Phaser.Scene {
   }
 
   private updatePlayerList(users: LobbyUser[]) {
+    // Check if playerList exists before updating
+    if (!this.playerList) {
+      console.warn('PlayerList not available, skipping update');
+      return;
+    }
+
     const user = this.registry.get('user');
     const currentUserId = user?.id;
 
@@ -302,6 +345,13 @@ export class LobbyScene extends Phaser.Scene {
 
   private handleMatchTimeout() {
     console.log('⏰ Match timeout');
+
+    // Check if scene is still active and matchButton exists
+    if (this.isDestroyed || !this.scene || !this.scene.isActive || !this.scene.isActive() || !this.matchButton) {
+      console.warn('Scene inactive or matchButton not available, skipping timeout update');
+      return;
+    }
+
     this.isInQueue = false;
     this.matchButton.setText('Find Match');
     this.matchButton.setStyle({ backgroundColor: '#059669' });
@@ -309,16 +359,32 @@ export class LobbyScene extends Phaser.Scene {
 
   private handleMatchQueued(data: { position: number; estimatedWait: number }) {
     console.log('📝 Queued for match:', data);
+
+    // Check if scene is still active and matchButton exists
+    if (this.isDestroyed || !this.scene || !this.scene.isActive || !this.scene.isActive() || !this.matchButton) {
+      console.warn('Scene inactive or matchButton not available, skipping queue update');
+      return;
+    }
+
     this.matchButton.setText(`In Queue (${data.position})`);
   }
 
   shutdown() {
-    // Cleanup socket listeners
+    console.log('🧹 Shutting down LobbyScene');
+
+    // Mark scene as destroyed to prevent further event handling
+    this.isDestroyed = true;
+
+    // Cleanup socket listeners (remove all listeners for these events)
     socketManager.off('lobby.snapshot');
     socketManager.off('lobby.update');
     socketManager.off('lobby.position');
     socketManager.off('match.found');
     socketManager.off('match.timeout');
     socketManager.off('match.queued');
+
+    // Clear other players
+    this.clearOtherPlayers();
   }
+
 }
