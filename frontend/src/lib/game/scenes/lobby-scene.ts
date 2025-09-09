@@ -200,7 +200,7 @@ export class LobbyScene extends Phaser.Scene {
 
   private handleLobbySnapshot(data: { users: LobbyUser[]; userPosition: { x: number; y: number } }) {
     // Check if scene is still active and properly initialized
-    if (this.isDestroyed || !this.scene || !this.scene.isActive || !this.scene.isActive()) {
+    if (this.isDestroyed || !this.scene || !this.scene.manager || !this.scene.manager.isActive(this.scene.key)) {
       console.warn('Scene inactive or not initialized, skipping lobby snapshot update');
       return;
     }
@@ -219,7 +219,7 @@ export class LobbyScene extends Phaser.Scene {
 
   private handleLobbyUpdate(data: { users: LobbyUser[] }) {
     // Check if scene is still active and properly initialized
-    if (this.isDestroyed || !this.scene || !this.scene.isActive || !this.scene.isActive()) {
+    if (this.isDestroyed || !this.scene || !this.scene.manager || !this.scene.manager.isActive(this.scene.key)) {
       console.warn('Scene inactive or not initialized, skipping lobby update');
       return;
     }
@@ -229,7 +229,7 @@ export class LobbyScene extends Phaser.Scene {
 
   private handlePositionUpdate(data: { userId: string; x: number; y: number }) {
     // Check if scene is still active and properly initialized
-    if (this.isDestroyed || !this.scene || !this.scene.isActive || !this.scene.isActive()) {
+    if (this.isDestroyed || !this.scene || !this.scene.manager || !this.scene.manager.isActive(this.scene.key)) {
       console.warn('Scene inactive or not initialized, skipping position update');
       return;
     }
@@ -347,7 +347,7 @@ export class LobbyScene extends Phaser.Scene {
     console.log('⏰ Match timeout');
 
     // Check if scene is still active and matchButton exists
-    if (this.isDestroyed || !this.scene || !this.scene.isActive || !this.scene.isActive() || !this.matchButton) {
+    if (this.isDestroyed || !this.scene || !this.scene.manager || !this.scene.manager.isActive(this.scene.key) || !this.matchButton) {
       console.warn('Scene inactive or matchButton not available, skipping timeout update');
       return;
     }
@@ -361,7 +361,7 @@ export class LobbyScene extends Phaser.Scene {
     console.log('📝 Queued for match:', data);
 
     // Check if scene is still active and matchButton exists
-    if (this.isDestroyed || !this.scene || !this.scene.isActive || !this.scene.isActive() || !this.matchButton) {
+    if (this.isDestroyed || !this.scene || !this.scene.manager || !this.scene.manager.isActive(this.scene.key) || !this.matchButton) {
       console.warn('Scene inactive or matchButton not available, skipping queue update');
       return;
     }

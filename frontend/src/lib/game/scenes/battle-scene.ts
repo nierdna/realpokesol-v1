@@ -270,7 +270,7 @@ export class BattleScene extends Phaser.Scene {
     console.log('🏆 Battle ended:', data);
     
     // Check if scene is still active and properly initialized
-    if (this.isDestroyed || !this.scene || !this.scene.isActive || !this.scene.isActive()) {
+    if (this.isDestroyed || !this.scene || !this.scene.manager || !this.scene.manager.isActive(this.scene.key)) {
       console.warn('Scene inactive or not initialized, skipping battle end handling');
       return;
     }
@@ -291,7 +291,7 @@ export class BattleScene extends Phaser.Scene {
 
     // Show return to lobby button after 3 seconds
     setTimeout(() => {
-      if (this.scene && this.scene.isActive && this.scene.isActive()) {
+      if (this.scene && this.scene.manager && this.scene.manager.isActive(this.scene.key)) {
         this.returnToLobby();
       }
     }, 3000);
@@ -303,7 +303,7 @@ export class BattleScene extends Phaser.Scene {
 
   private updateTurnIndicator() {
     // Check if scene is still active and UI elements exist
-    if (this.isDestroyed || !this.scene || !this.scene.isActive || !this.scene.isActive() || !this.turnIndicator || !this.actionButton) {
+    if (this.isDestroyed || !this.scene || !this.scene.manager || !this.scene.manager.isActive(this.scene.key) || !this.turnIndicator || !this.actionButton) {
       console.warn('Scene inactive or UI elements not available, skipping turn indicator update');
       return;
     }
