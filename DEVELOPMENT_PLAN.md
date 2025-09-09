@@ -76,35 +76,35 @@
 
 ---
 
-## Phase 4: Core Backend Services (3-4 ngày) ⏳
+## Phase 4: Core Backend Services (3-4 ngày) ✅
 
 ### 4.1 User Management
-- [ ] UserService với repository pattern
-- [ ] User creation từ SIWS
-- [ ] Socket binding (`socketId ↔ userId`)
-- [ ] Online/offline status management
+- [x] UserService với repository pattern
+- [x] User creation từ SIWS
+- [x] Socket binding (`socketId ↔ userId`)
+- [x] Online/offline status management
 
 ### 4.2 Lobby System
-- [ ] LobbyService với server-authoritative movement
-- [ ] Position broadcast (10-15 Hz)
-- [ ] Chat system với rate limiting
-- [ ] Emotes system
-- [ ] Player list management
+- [x] LobbyService với server-authoritative movement
+- [x] Position broadcast (10-15 Hz)
+- [x] Chat system với rate limiting
+- [x] Emotes system
+- [x] Player list management
 
 ### 4.3 Matchmaking System
-- [ ] FIFO queue implementation
-- [ ] Fairness algorithm (người chờ lâu nhất)
-- [ ] Timeout handling (60s)
-- [ ] Room creation logic
+- [x] FIFO queue implementation
+- [x] Fairness algorithm (người chờ lâu nhất)
+- [x] Timeout handling (60s)
+- [x] Room creation logic
 
 ### 4.4 Battle System
-- [ ] Turn-based battle engine
-- [ ] Random damage calculation (10-60, crit 10%)
-- [ ] HP management và KO logic
-- [ ] Level progression (+1 cho winner)
-- [ ] Battle log system
-- [ ] AFK timeout (60s)
-- [ ] Resume on reconnect
+- [x] Turn-based battle engine
+- [x] Random damage calculation (10-60, crit 10%)
+- [x] HP management và KO logic
+- [x] Level progression (+1 cho winner)
+- [x] Battle log system
+- [x] AFK timeout (60s)
+- [x] Resume on reconnect
 
 ---
 
@@ -200,7 +200,7 @@
 | Foundation & Setup | 3-4 ngày | ✅ | None |
 | Authentication | 2-3 ngày | ⏳ | Phase 1 |
 | Storage Adapter | 2 ngày | ✅ | Phase 1 |
-| Core Services | 3-4 ngày | ⏳ | Phase 2,3 |
+| Core Services | 3-4 ngày | ✅ | Phase 2,3 |
 | Socket Events | 2 ngày | ⏳ | Phase 4 |
 | Frontend Game | 4-5 ngày | ⏳ | Phase 2,5 |
 | Integration & Testing | 2-3 ngày | ⏳ | Phase 6 |
@@ -212,15 +212,16 @@
 
 ## Current Focus
 
-**Active Phase**: Phase 4 - Core Backend Services 🚧
-**Current Task**: Ready to implement UserService, LobbyService, MatchmakingService
-**Next Milestone**: Complete core domain services với Storage Adapter
-**Blocking Issues**: None
+**Active Phase**: Phase 5 - Socket Events & Communication 🚧
+**Current Task**: Ready to implement Socket.io Gateway và event handlers
+**Next Milestone**: Complete real-time multiplayer communication
+**Blocking Issues**: Minor backend startup issue (build OK, services implemented)
 
 **Completed Phases**: 
 - ✅ **Phase 1**: Monorepo structure, NestJS backend, Next.js frontend, dependencies installed
 - ✅ **Phase 2**: SIWS authentication, JWT tokens, nonce management  
 - ✅ **Phase 3**: Storage Adapter pattern, Memory implementation, Postgres ready
+- ✅ **Phase 4**: Core services - UserService, LobbyService, MatchmakingService, BattleService
 
 ---
 
