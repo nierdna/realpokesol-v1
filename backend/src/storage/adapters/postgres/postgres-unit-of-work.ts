@@ -17,7 +17,7 @@ export class PostgresUnitOfWork implements IUnitOfWork {
     return this.prisma.$transaction(async (trx: PrismaClient) => {
       const userRepo = new PostgresUserRepository(trx as PrismaClient);
       const battleRepo = new PostgresBattleRepository(trx as PrismaClient);
-      
+
       const context: TransactionContext = {
         userRepo,
         battleRepo,

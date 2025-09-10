@@ -38,7 +38,10 @@ export class AuthService {
   generateNonce(wallet: string) {
     // Generate nonce using nonce service
     const nonceData = this.nonceService.generateNonce(wallet);
-    const domain = this.configService.get<string>('DOMAIN', 'pokemon-arena.local');
+    const domain = this.configService.get<string>(
+      'DOMAIN',
+      'pokemon-arena.local',
+    );
 
     return {
       nonce: nonceData.nonce,

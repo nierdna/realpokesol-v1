@@ -1,4 +1,4 @@
-import { WalletContextState } from '@solana/wallet-adapter-react';
+import { WalletContextState } from "@solana/wallet-adapter-react";
 
 export interface NonceResponse {
   nonce: string;
@@ -28,7 +28,7 @@ export class SiwsClient {
   private readonly apiUrl: string;
 
   constructor() {
-    this.apiUrl = process.env.NEXT_PUBLIC_API_URL! + '/api';
+    this.apiUrl = process.env.NEXT_PUBLIC_API_URL! + "/api";
   }
 
   /**
@@ -36,7 +36,7 @@ export class SiwsClient {
    */
   async getNonce(walletAddress: string): Promise<NonceResponse> {
     const response = await fetch(
-      `${this.apiUrl}/auth/nonce?wallet=${encodeURIComponent(walletAddress)}`
+      `${this.apiUrl}/auth/nonce?wallet=${encodeURIComponent(walletAddress)}`,
     );
 
     if (!response.ok) {
@@ -45,7 +45,7 @@ export class SiwsClient {
 
     const result = await response.json();
     if (!result.success) {
-      throw new Error(result.message || 'Failed to get nonce');
+      throw new Error(result.message || "Failed to get nonce");
     }
 
     return result.data;
@@ -56,22 +56,21 @@ export class SiwsClient {
    */
   async signMessage(
     wallet: WalletContextState,
-    nonce: NonceResponse
+    nonce: NonceResponse,
   ): Promise<{ message: string; signature: string }> {
     if (!wallet.publicKey || !wallet.signMessage) {
-      throw new Error('Wallet not connected or does not support message signing');
+      throw new Error(
+        "Wallet not connected or does not support message signing",
+      );
     }
 
     // Build SIWS message
-    const message = this.buildSiwsMessage(
-      wallet.publicKey.toBase58(),
-      nonce
-    );
+    const message = this.buildSiwsMessage(wallet.publicKey.toBase58(), nonce);
 
     // Sign message
     const messageBytes = new TextEncoder().encode(message);
     const signatureBytes = await wallet.signMessage(messageBytes);
-    const signature = Buffer.from(signatureBytes).toString('base64');
+    const signature = Buffer.from(signatureBytes).toString("base64");
 
     return { message, signature };
   }
@@ -82,12 +81,12 @@ export class SiwsClient {
   async verifySiws(
     walletAddress: string,
     message: string,
-    signature: string
+    signature: string,
   ): Promise<SiwsResponse> {
     const response = await fetch(`${this.apiUrl}/auth/siws`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         wallet: walletAddress,
@@ -98,12 +97,14 @@ export class SiwsClient {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || `SIWS verification failed: ${response.statusText}`);
+      throw new Error(
+        error.message || `SIWS verification failed: ${response.statusText}`,
+      );
     }
 
     const result = await response.json();
     if (!result.success) {
-      throw new Error(result.message || 'SIWS verification failed');
+      throw new Error(result.message || "SIWS verification failed");
     }
 
     return result.data;
@@ -114,7 +115,7 @@ export class SiwsClient {
    */
   async completeSiwsFlow(wallet: WalletContextState): Promise<SiwsResponse> {
     if (!wallet.publicKey) {
-      throw new Error('Wallet not connected');
+      throw new Error("Wallet not connected");
     }
 
     const walletAddress = wallet.publicKey.toBase58();
@@ -134,19 +135,22 @@ export class SiwsClient {
   /**
    * Build SIWS message according to spec
    */
-  private buildSiwsMessage(walletAddress: string, nonce: NonceResponse): string {
+  private buildSiwsMessage(
+    walletAddress: string,
+    nonce: NonceResponse,
+  ): string {
     return [
       `Pokémon Summon Arena wants you to sign in with your Solana account:`,
       walletAddress,
-      '',
+      "",
       `URI: https://${nonce.domain}`,
       `Domain: ${nonce.domain}`,
       `Statement: ${nonce.statement}`,
       `Nonce: ${nonce.nonce}`,
       `Issued At: ${nonce.issuedAt}`,
       `Expiration Time: ${nonce.expirationTime}`,
-      `Version: 1`
-    ].join('\n');
+      `Version: 1`,
+    ].join("\n");
   }
 }
 

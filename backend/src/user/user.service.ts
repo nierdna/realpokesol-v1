@@ -95,7 +95,10 @@ export class UserService {
         Math.min(updates?.hp ?? currentCreature.hp, currentCreature.maxHp),
       ),
       // Ensure level is within bounds
-      level: Math.max(1, Math.min(100, updates?.level ?? currentCreature.level)),
+      level: Math.max(
+        1,
+        Math.min(100, updates?.level ?? currentCreature.level),
+      ),
     };
 
     // Recalculate maxHp if level changed

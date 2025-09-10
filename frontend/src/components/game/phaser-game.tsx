@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, MutableRefObject } from 'react';
-import * as Phaser from 'phaser';
-import { LoadingScene } from '@/lib/game/scenes/loading-scene';
-import { LobbyScene } from '@/lib/game/scenes/lobby-scene';
-import { BattleScene } from '@/lib/game/scenes/battle-scene';
+import { useEffect, useRef, MutableRefObject } from "react";
+import * as Phaser from "phaser";
+import { LoadingScene } from "@/lib/game/scenes/loading-scene";
+import { LobbyScene } from "@/lib/game/scenes/lobby-scene";
+import { BattleScene } from "@/lib/game/scenes/battle-scene";
 
 interface User {
   id: string;
@@ -36,16 +36,16 @@ export function PhaserGame({ onGameLoaded, user, gameRef }: PhaserGameProps) {
     // Phaser game configuration
     const config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
-      width: typeof window !== 'undefined' ? window.innerWidth : 800,
-      height: typeof window !== 'undefined' ? window.innerHeight : 600,
+      width: typeof window !== "undefined" ? window.innerWidth : 800,
+      height: typeof window !== "undefined" ? window.innerHeight : 600,
       parent: gameContainerRef.current,
-      backgroundColor: '#1a1a1a',
+      backgroundColor: "#1a1a1a",
       scene: [LoadingScene, LobbyScene, BattleScene],
       physics: {
-        default: 'arcade',
+        default: "arcade",
         arcade: {
           gravity: { x: 0, y: 0 },
-          debug: process.env.NODE_ENV === 'development',
+          debug: process.env.NODE_ENV === "development",
         },
       },
       scale: {
@@ -62,24 +62,24 @@ export function PhaserGame({ onGameLoaded, user, gameRef }: PhaserGameProps) {
     gameRef.current = game;
 
     // Pass user data to scenes
-    game.registry.set('user', user);
-    game.registry.set('onGameLoaded', onGameLoaded);
+    game.registry.set("user", user);
+    game.registry.set("onGameLoaded", onGameLoaded);
 
     // Handle window resize
     const handleResize = () => {
-      if (game && game.scale && typeof window !== 'undefined') {
+      if (game && game.scale && typeof window !== "undefined") {
         game.scale.resize(window.innerWidth, window.innerHeight);
       }
     };
 
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', handleResize);
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", handleResize);
     }
 
     // Cleanup on unmount
     return () => {
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('resize', handleResize);
+      if (typeof window !== "undefined") {
+        window.removeEventListener("resize", handleResize);
       }
       if (gameRef.current) {
         gameRef.current.destroy(true);
@@ -89,10 +89,10 @@ export function PhaserGame({ onGameLoaded, user, gameRef }: PhaserGameProps) {
   }, [user, onGameLoaded, gameRef]);
 
   return (
-    <div 
-      ref={gameContainerRef} 
+    <div
+      ref={gameContainerRef}
       className="w-full h-full"
-      style={{ width: '100vw', height: '100vh' }}
+      style={{ width: "100vw", height: "100vh" }}
     />
   );
 }

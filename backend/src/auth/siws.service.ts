@@ -63,7 +63,11 @@ export class SiwsService {
       }
 
       // 5. Verify Ed25519 signature
-      const signatureValid = await this.verifySignature(wallet, message, signature);
+      const signatureValid = await this.verifySignature(
+        wallet,
+        message,
+        signature,
+      );
       if (!signatureValid) {
         return { valid: false, reason: 'INVALID_SIGNATURE' };
       }

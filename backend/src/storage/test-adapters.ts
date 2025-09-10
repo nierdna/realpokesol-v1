@@ -46,7 +46,10 @@ async function testUserRepository(repo: any, name: string) {
 
     // Test findByWallet
     const foundByWallet = await repo.findByWallet(testUser.walletAddress);
-    console.log('✅ Find by wallet: OK', foundByWallet ? '(found)' : '(not found)');
+    console.log(
+      '✅ Find by wallet: OK',
+      foundByWallet ? '(found)' : '(not found)',
+    );
 
     // Test update
     await repo.update({ id: testUser.id, nickname: 'UpdatedPlayer' });
@@ -136,7 +139,10 @@ async function runTests() {
   const memoryBattleRepo = new MemoryBattleRepository();
 
   const memoryUserTest = await testUserRepository(memoryUserRepo, 'Memory');
-  const memoryBattleTest = await testBattleRepository(memoryBattleRepo, 'Memory');
+  const memoryBattleTest = await testBattleRepository(
+    memoryBattleRepo,
+    'Memory',
+  );
 
   allPassed = allPassed && memoryUserTest && memoryBattleTest;
 
@@ -147,7 +153,7 @@ async function runTests() {
     console.log('='.repeat(50));
 
     const prisma = new PrismaClient();
-    
+
     try {
       await prisma.$connect();
       console.log('✅ Postgres connection: OK');
@@ -155,8 +161,14 @@ async function runTests() {
       const postgresUserRepo = new PostgresUserRepository(prisma);
       const postgresBattleRepo = new PostgresBattleRepository(prisma);
 
-      const postgresUserTest = await testUserRepository(postgresUserRepo, 'Postgres');
-      const postgresBattleTest = await testBattleRepository(postgresBattleRepo, 'Postgres');
+      const postgresUserTest = await testUserRepository(
+        postgresUserRepo,
+        'Postgres',
+      );
+      const postgresBattleTest = await testBattleRepository(
+        postgresBattleRepo,
+        'Postgres',
+      );
 
       allPassed = allPassed && postgresUserTest && postgresBattleTest;
     } catch (error) {

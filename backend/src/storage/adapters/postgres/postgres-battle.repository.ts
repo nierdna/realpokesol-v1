@@ -7,7 +7,7 @@ import {
 
 @Injectable()
 export class PostgresBattleRepository implements IBattleRepository {
-  constructor(private prisma: PrismaClient) { }
+  constructor(private prisma: PrismaClient) {}
 
   async create(battle: Battle): Promise<void> {
     await this.prisma.battle.create({
@@ -47,7 +47,8 @@ export class PostgresBattleRepository implements IBattleRepository {
   async update(id: string, patch: Partial<Battle>): Promise<void> {
     const updateData: any = {};
 
-    if (patch.currentTurn !== undefined) updateData.currentTurn = patch.currentTurn;
+    if (patch.currentTurn !== undefined)
+      updateData.currentTurn = patch.currentTurn;
     if (patch.turnCount !== undefined) updateData.turnCount = patch.turnCount;
     if (patch.state !== undefined) updateData.state = patch.state;
     if (patch.winnerId !== undefined) updateData.winnerId = patch.winnerId;
@@ -100,10 +101,7 @@ export class PostgresBattleRepository implements IBattleRepository {
   async findByPlayerId(playerId: string): Promise<Battle | null> {
     const battle = await this.prisma.battle.findFirst({
       where: {
-        OR: [
-          { player1Id: playerId },
-          { player2Id: playerId },
-        ],
+        OR: [{ player1Id: playerId }, { player2Id: playerId }],
         state: { in: ['waiting', 'active'] },
       },
       include: {

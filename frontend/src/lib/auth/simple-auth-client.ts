@@ -1,4 +1,4 @@
-import { WalletContextState } from '@solana/wallet-adapter-react';
+import { WalletContextState } from "@solana/wallet-adapter-react";
 
 export interface ChallengeResponse {
   nonce: string;
@@ -29,7 +29,7 @@ export class SimpleAuthClient {
   private readonly apiUrl: string;
 
   constructor() {
-    this.apiUrl = process.env.NEXT_PUBLIC_API_URL! + '/api';
+    this.apiUrl = process.env.NEXT_PUBLIC_API_URL! + "/api";
   }
 
   /**
@@ -37,7 +37,7 @@ export class SimpleAuthClient {
    */
   async getChallenge(walletAddress: string): Promise<ChallengeResponse> {
     const response = await fetch(
-      `${this.apiUrl}/auth/nonce?wallet=${encodeURIComponent(walletAddress)}`
+      `${this.apiUrl}/auth/nonce?wallet=${encodeURIComponent(walletAddress)}`,
     );
 
     if (!response.ok) {
@@ -46,7 +46,7 @@ export class SimpleAuthClient {
 
     const result = await response.json();
     if (!result.success) {
-      throw new Error(result.message || 'Failed to get challenge');
+      throw new Error(result.message || "Failed to get challenge");
     }
 
     return result.data;
@@ -57,10 +57,12 @@ export class SimpleAuthClient {
    */
   async signMessage(
     wallet: WalletContextState,
-    challenge: ChallengeResponse
+    challenge: ChallengeResponse,
   ): Promise<{ message: string; signature: string }> {
     if (!wallet.publicKey || !wallet.signMessage) {
-      throw new Error('Wallet not connected or does not support message signing');
+      throw new Error(
+        "Wallet not connected or does not support message signing",
+      );
     }
 
     const message = challenge.message;
@@ -68,7 +70,7 @@ export class SimpleAuthClient {
     // Sign message
     const messageBytes = new TextEncoder().encode(message);
     const signatureBytes = await wallet.signMessage(messageBytes);
-    const signature = Buffer.from(signatureBytes).toString('base64');
+    const signature = Buffer.from(signatureBytes).toString("base64");
 
     return { message, signature };
   }
@@ -79,12 +81,12 @@ export class SimpleAuthClient {
   async verifyAuth(
     walletAddress: string,
     message: string,
-    signature: string
+    signature: string,
   ): Promise<AuthResponse> {
     const response = await fetch(`${this.apiUrl}/auth/verify`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         wallet: walletAddress,
@@ -95,12 +97,14 @@ export class SimpleAuthClient {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || `Auth verification failed: ${response.statusText}`);
+      throw new Error(
+        error.message || `Auth verification failed: ${response.statusText}`,
+      );
     }
 
     const result = await response.json();
     if (!result.success) {
-      throw new Error(result.message || 'Auth verification failed');
+      throw new Error(result.message || "Auth verification failed");
     }
 
     return result.data;
@@ -111,7 +115,7 @@ export class SimpleAuthClient {
    */
   async completeAuthFlow(wallet: WalletContextState): Promise<AuthResponse> {
     if (!wallet.publicKey) {
-      throw new Error('Wallet not connected');
+      throw new Error("Wallet not connected");
     }
 
     const walletAddress = wallet.publicKey.toBase58();
