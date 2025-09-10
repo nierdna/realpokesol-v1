@@ -1,0 +1,26 @@
+{
+  "name": "pokemon-summon-arena-mvp",
+  "version": "1.0.0",
+  "description": "Pokemon Summon Arena MVP - PvP turn-based 2D game with Solana authentication",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
+    "dev:backend": "pnpm --filter backend run start:dev",
+    "dev:frontend": "pnpm --filter frontend run dev",
+    "build": "pnpm --filter backend run build && pnpm --filter frontend run build",
+    "start": "concurrently \"pnpm --filter backend run start:prod\" \"pnpm --filter frontend run start\"",
+    "test": "pnpm --filter backend run test && pnpm --filter frontend run test",
+    "clean": "pnpm --filter backend run clean && pnpm --filter frontend run clean",
+    "install:all": "pnpm install",
+    "lint": "pnpm --filter backend run lint && pnpm --filter frontend run lint",
+    "format": "pnpm --filter backend run format && pnpm --filter frontend run format"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.1"
+}

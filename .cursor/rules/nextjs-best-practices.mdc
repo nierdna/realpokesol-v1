@@ -1,6 +1,5 @@
 ---
-globs: *.tsx
-alwaysApply: false
+alwaysApply: true
 ---
 # Next.js and React Best Practices
 
