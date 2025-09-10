@@ -1,8 +1,6 @@
 ---
-description: Prisma ORM Development Guidelines
 alwaysApply: false
 ---
-
 # Prisma ORM Development Guidelines
 
 You are a senior TypeScript/JavaScript programmer with expertise in Prisma ORM, clean code principles, and modern backend development.

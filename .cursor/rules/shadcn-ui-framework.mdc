@@ -1,8 +1,6 @@
 ---
-alwaysApply: true
-description: Always use MCP shadcn/ui for UI component development and design tasks
+alwaysApply: false
 ---
-
 # shadcn/ui Framework Integration
 
 This project uses **shadcn/ui** as the primary UI component library. Always utilize the MCP shadcn tools for all UI-related tasks.

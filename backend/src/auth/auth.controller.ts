@@ -88,12 +88,15 @@ export class AuthController {
         data: result,
       };
     } catch (error: any) {
-      this.logger.error(`Simple auth verification error: ${error?.message || error}`);
+      this.logger.error(
+        `Simple auth verification error: ${error?.message || error}`,
+      );
       throw new HttpException(
         {
           success: false,
           error: 'AUTH_VERIFICATION_FAILED',
-          message: error?.message || 'Failed to verify authentication signature',
+          message:
+            error?.message || 'Failed to verify authentication signature',
         },
         HttpStatus.UNAUTHORIZED,
       );

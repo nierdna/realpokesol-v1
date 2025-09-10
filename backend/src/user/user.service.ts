@@ -50,9 +50,9 @@ export class UserService {
     const clampedX = Math.max(-1000, Math.min(1000, x));
     const clampedY = Math.max(-1000, Math.min(1000, y));
 
-    await this.userRepository.updatePosition(userId, { 
-      x: clampedX, 
-      y: clampedY 
+    await this.userRepository.updatePosition(userId, {
+      x: clampedX,
+      y: clampedY,
     });
   }
 
@@ -67,7 +67,10 @@ export class UserService {
   /**
    * Update creature stats (HP, level, etc.)
    */
-  async updateCreature(userId: string, updates: Partial<User['creature']>): Promise<void> {
+  async updateCreature(
+    userId: string,
+    updates: Partial<User['creature']>,
+  ): Promise<void> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new Error(`User not found: ${userId}`);
@@ -77,14 +80,17 @@ export class UserService {
       ...user.creature,
       ...updates,
       // Ensure HP is within bounds
-      hp: Math.max(0, Math.min(updates.hp ?? user.creature.hp, user.creature.maxHp)),
+      hp: Math.max(
+        0,
+        Math.min(updates.hp ?? user.creature.hp, user.creature.maxHp),
+      ),
       // Ensure level is within bounds
       level: Math.max(1, Math.min(100, updates.level ?? user.creature.level)),
     };
 
     // Recalculate maxHp if level changed
     if (updates.level && updates.level !== user.creature.level) {
-      updatedCreature.maxHp = 50 + (updatedCreature.level * 5);
+      updatedCreature.maxHp = 50 + updatedCreature.level * 5;
       // If HP is higher than new maxHp, cap it
       updatedCreature.hp = Math.min(updatedCreature.hp, updatedCreature.maxHp);
     }
@@ -104,7 +110,7 @@ export class UserService {
 
     const newLevel = Math.min(100, user.creature.level + 1);
     await this.updateCreature(userId, { level: newLevel });
-    
+
     this.logger.log(`User ${userId} leveled up to ${newLevel}`);
   }
 
@@ -116,7 +122,7 @@ export class UserService {
       hp: 1,
       isFainted: false,
     });
-    
+
     this.logger.log(`Creature revived for user ${userId}`);
   }
 
@@ -128,7 +134,7 @@ export class UserService {
       hp: 0,
       isFainted: true,
     });
-    
+
     this.logger.log(`Creature fainted for user ${userId}`);
   }
 

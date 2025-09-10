@@ -32,5 +32,8 @@ export interface IUserRepository {
   listOnline(limit?: number): Promise<UserSummary[]>;
   upsertCreature(userId: string, creature: User['creature']): Promise<void>;
   setInBattle(userId: string, inBattle: boolean): Promise<void>;
-  updatePosition(userId: string, position: { x: number; y: number }): Promise<void>;
+  updatePosition(
+    userId: string,
+    position: { x: number; y: number },
+  ): Promise<void>;
 }

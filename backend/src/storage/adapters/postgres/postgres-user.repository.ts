@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { IUserRepository, User, UserSummary } from '../../ports/user-repository.interface';
+import {
+  IUserRepository,
+  User,
+  UserSummary,
+} from '../../ports/user-repository.interface';
 
 @Injectable()
 export class PostgresUserRepository implements IUserRepository {
-  constructor(
-    // private prisma: PrismaService, // TODO: Add when implementing
-  ) {}
+  constructor() {} // private prisma: PrismaService, // TODO: Add when implementing
 
   async findById(userId: string): Promise<User | null> {
     throw new Error('PostgresUserRepository not implemented yet');
@@ -31,7 +33,10 @@ export class PostgresUserRepository implements IUserRepository {
     throw new Error('PostgresUserRepository not implemented yet');
   }
 
-  async upsertCreature(userId: string, creature: User['creature']): Promise<void> {
+  async upsertCreature(
+    userId: string,
+    creature: User['creature'],
+  ): Promise<void> {
     throw new Error('PostgresUserRepository not implemented yet');
   }
 
@@ -39,7 +44,10 @@ export class PostgresUserRepository implements IUserRepository {
     throw new Error('PostgresUserRepository not implemented yet');
   }
 
-  async updatePosition(userId: string, position: { x: number; y: number }): Promise<void> {
+  async updatePosition(
+    userId: string,
+    position: { x: number; y: number },
+  ): Promise<void> {
     throw new Error('PostgresUserRepository not implemented yet');
   }
 }

@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { IUserRepository, User, UserSummary } from '../../ports/user-repository.interface';
+import {
+  IUserRepository,
+  User,
+  UserSummary,
+} from '../../ports/user-repository.interface';
 
 @Injectable()
 export class MemoryUserRepository implements IUserRepository {
@@ -67,7 +71,10 @@ export class MemoryUserRepository implements IUserRepository {
     return online;
   }
 
-  async upsertCreature(userId: string, creature: User['creature']): Promise<void> {
+  async upsertCreature(
+    userId: string,
+    creature: User['creature'],
+  ): Promise<void> {
     const user = this.users.get(userId);
     if (!user) {
       throw new Error(`User not found: ${userId}`);
@@ -87,7 +94,10 @@ export class MemoryUserRepository implements IUserRepository {
     this.users.set(userId, user);
   }
 
-  async updatePosition(userId: string, position: { x: number; y: number }): Promise<void> {
+  async updatePosition(
+    userId: string,
+    position: { x: number; y: number },
+  ): Promise<void> {
     const user = this.users.get(userId);
     if (!user) {
       throw new Error(`User not found: ${userId}`);
@@ -99,11 +109,14 @@ export class MemoryUserRepository implements IUserRepository {
 
   // Debug methods
   getStats() {
-    const online = Array.from(this.users.values()).filter(u => u.socketId).length;
+    const online = Array.from(this.users.values()).filter(
+      (u) => u.socketId,
+    ).length;
     return {
       total: this.users.size,
       online,
-      inBattle: Array.from(this.users.values()).filter(u => u.isInBattle).length,
+      inBattle: Array.from(this.users.values()).filter((u) => u.isInBattle)
+        .length,
     };
   }
 

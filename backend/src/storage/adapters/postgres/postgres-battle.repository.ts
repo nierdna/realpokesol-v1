@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { IBattleRepository, Battle } from '../../ports/battle-repository.interface';
+import {
+  IBattleRepository,
+  Battle,
+} from '../../ports/battle-repository.interface';
 
 @Injectable()
 export class PostgresBattleRepository implements IBattleRepository {
-  constructor(
-    // private prisma: PrismaService, // TODO: Add when implementing
-  ) {}
+  constructor() {} // private prisma: PrismaService, // TODO: Add when implementing
 
   async create(battle: Battle): Promise<void> {
     throw new Error('PostgresBattleRepository not implemented yet');

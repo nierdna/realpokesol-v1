@@ -64,7 +64,13 @@ export class BattleScene extends Phaser.Scene {
     // Setup socket listeners
     this.setupSocketListeners();
 
-    console.log('✅ Battle scene created');
+    // ✅ Emit battle.ready khi scene đã setup xong
+    console.log('🚀 Battle scene ready, emitting battle.ready event');
+    socketManager.emit('battle.ready', { 
+      roomId: this.currentBattle.roomId 
+    });
+
+    console.log('✅ Battle scene created and ready signal sent');
   }
 
   private createBattleUI() {
@@ -211,12 +217,14 @@ export class BattleScene extends Phaser.Scene {
 
   private setupSocketListeners() {
     socketManager.on('battle.start', (data: unknown) => {
+      console.log('✅ Received battle.start event:', data);
       if (!this.isDestroyed) {
         this.handleBattleStart(data as { roomId: string; battleState: BattleState });
       }
     });
     
     socketManager.on('battle.turn', (data: unknown) => {
+      console.log('Data in battle.turn', data);
       if (!this.isDestroyed) {
         this.handleBattleTurn(data as {
           damage: number;
@@ -234,12 +242,29 @@ export class BattleScene extends Phaser.Scene {
         this.handleBattleEnd(data as { winnerId: string; newLevels: { [userId: string]: number } });
       }
     });
+
+    socketManager.on('battle.timeout', (data: unknown) => {
+      console.log('⏰ Battle timeout received:', data);
+      if (!this.isDestroyed) {
+        this.handleBattleTimeout(data as { reason: string; readyCount: number; expectedCount: number; timestamp: string });
+      }
+    });
   }
 
   private handleBattleStart(data: { roomId: string; battleState: BattleState }) {
     console.log('⚔️ Battle started:', data);
     
     this.battleState = data.battleState;
+
+    // Debug logs
+    const user = this.registry.get('user');
+    console.log('🔍 Debug Battle Start:');
+    console.log('- User ID:', user?.id);
+    console.log('- Current turn owner:', this.battleState.currentTurnOwnerId);
+    console.log('- Is my turn:', this.battleState.currentTurnOwnerId === user?.id);
+    console.log('- Action button exists:', !!this.actionButton);
+    console.log('- Turn indicator exists:', !!this.turnIndicator);
+
     this.updateHPBars();
     this.updateTurnIndicator();
     
@@ -304,6 +329,36 @@ export class BattleScene extends Phaser.Scene {
     }, 3000);
   }
 
+  private handleBattleTimeout(data: { reason: string; readyCount: number; expectedCount: number; timestamp: string }) {
+    console.log('⏰ Battle timeout:', data);
+    
+    // Check if scene is still active and properly initialized
+    if (this.isDestroyed || !this.scene || !this.scene.manager || !this.scene.manager.isActive(this.scene.key)) {
+      console.warn('Scene inactive or not initialized, skipping battle timeout handling');
+      return;
+    }
+
+    // Show timeout message
+    this.addLogLine(`Battle timeout: ${data.reason}`);
+    this.addLogLine(`Ready players: ${data.readyCount}/${data.expectedCount}`);
+    
+    if (this.turnIndicator) {
+      this.turnIndicator.setText('⏰ Battle Timeout');
+      this.turnIndicator.setStyle({ color: '#ef4444' });
+    }
+
+    if (this.actionButton) {
+      this.actionButton.setVisible(false);
+    }
+
+    // Return to lobby after 3 seconds
+    setTimeout(() => {
+      if (this.scene && this.scene.manager && this.scene.manager.isActive(this.scene.key)) {
+        this.returnToLobby();
+      }
+    }, 3000);
+  }
+
   private handleMatchQueued(data: { position: number }) {
     console.log('📝 Match queued:', data);
   }
@@ -318,11 +373,18 @@ export class BattleScene extends Phaser.Scene {
     const user = this.registry.get('user');
     this.isMyTurn = this.battleState.currentTurnOwnerId === user?.id;
     
+    console.log('🔄 Updating Turn Indicator:');
+    console.log('- User ID:', user?.id);
+    console.log('- Current turn owner:', this.battleState?.currentTurnOwnerId);
+    console.log('- Is my turn:', this.isMyTurn);
+
     if (this.isMyTurn) {
+      console.log('✅ Setting MY TURN - showing attack button');
       this.turnIndicator.setText('Your Turn!');
       this.turnIndicator.setStyle({ color: '#10b981' });
       this.actionButton.setVisible(true);
     } else {
+      console.log('⏳ Setting OPPONENT TURN - hiding attack button');
       this.turnIndicator.setText("Opponent's Turn");
       this.turnIndicator.setStyle({ color: '#f59e0b' });
       this.actionButton.setVisible(false);
@@ -374,6 +436,7 @@ export class BattleScene extends Phaser.Scene {
     socketManager.off('battle.start');
     socketManager.off('battle.turn');
     socketManager.off('battle.end');
+    socketManager.off('battle.timeout');
   }
 
 }

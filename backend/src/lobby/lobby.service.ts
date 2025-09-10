@@ -55,8 +55,8 @@ export class LobbyService {
     const currentUser = await this.userService.findById(userId);
 
     const lobbyUsers: LobbyUser[] = onlineUsers
-      .filter(user => user.socketId && !user.isInBattle)
-      .map(user => ({
+      .filter((user) => user.socketId && !user.isInBattle)
+      .map((user) => ({
         id: user.id,
         nickname: user.nickname,
         level: user.creature.level,
@@ -75,13 +75,14 @@ export class LobbyService {
    * Handle user movement with server authority
    */
   async handleMovement(
-    userId: string, 
-    direction: 'up' | 'down' | 'left' | 'right'
+    userId: string,
+    direction: 'up' | 'down' | 'left' | 'right',
   ): Promise<{ x: number; y: number } | null> {
     // Rate limiting: max 20 moves per second
     const now = Date.now();
     const lastMove = this.lastMoveTime.get(userId) || 0;
-    if (now - lastMove < 50) { // 50ms = 20 moves/second
+    if (now - lastMove < 50) {
+      // 50ms = 20 moves/second
       return null; // Rate limited
     }
     this.lastMoveTime.set(userId, now);
@@ -112,8 +113,14 @@ export class LobbyService {
     }
 
     // Clamp to lobby bounds
-    newX = Math.max(this.LOBBY_BOUNDS.minX, Math.min(this.LOBBY_BOUNDS.maxX, newX));
-    newY = Math.max(this.LOBBY_BOUNDS.minY, Math.min(this.LOBBY_BOUNDS.maxY, newY));
+    newX = Math.max(
+      this.LOBBY_BOUNDS.minX,
+      Math.min(this.LOBBY_BOUNDS.maxX, newX),
+    );
+    newY = Math.max(
+      this.LOBBY_BOUNDS.minY,
+      Math.min(this.LOBBY_BOUNDS.maxY, newY),
+    );
 
     // Update position if changed
     if (newX !== user.position.x || newY !== user.position.y) {
@@ -127,11 +134,15 @@ export class LobbyService {
   /**
    * Handle chat message
    */
-  async handleChat(userId: string, message: string): Promise<ChatMessage | null> {
+  async handleChat(
+    userId: string,
+    message: string,
+  ): Promise<ChatMessage | null> {
     // Rate limiting: max 2 messages per second
     const now = Date.now();
     const lastChat = this.lastChatTime.get(userId) || 0;
-    if (now - lastChat < 500) { // 500ms = 2 messages/second
+    if (now - lastChat < 500) {
+      // 500ms = 2 messages/second
       return null; // Rate limited
     }
     this.lastChatTime.set(userId, now);
@@ -162,7 +173,10 @@ export class LobbyService {
   /**
    * Handle emote
    */
-  async handleEmote(userId: string, type: 'happy' | 'sad' | 'angry'): Promise<EmoteEvent | null> {
+  async handleEmote(
+    userId: string,
+    type: 'happy' | 'sad' | 'angry',
+  ): Promise<EmoteEvent | null> {
     // Rate limiting: same as chat
     const now = Date.now();
     const lastChat = this.lastChatTime.get(userId) || 0;
@@ -243,7 +257,7 @@ export class LobbyService {
    */
   async getStats() {
     const onlineUsers = await this.userService.getOnlineUsers();
-    const lobbyUsers = onlineUsers.filter(user => !user.isInBattle);
+    const lobbyUsers = onlineUsers.filter((user) => !user.isInBattle);
 
     return {
       totalOnline: onlineUsers.length,

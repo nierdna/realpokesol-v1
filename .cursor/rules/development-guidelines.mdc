@@ -1,7 +1,6 @@
 ---
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Pumpfun Development Guidelines
 
 ## Architecture Principles

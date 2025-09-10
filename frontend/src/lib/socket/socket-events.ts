@@ -66,6 +66,7 @@ export interface SocketEvents {
     winnerId?: string;
   }) => void;
   'battle.end': (data: { winnerId: string; newLevels: { [userId: string]: number }; reason?: string }) => void;
+  'battle.timeout': (data: { reason: string; readyCount: number; expectedCount: number; timestamp: string }) => void;
 
   // Debug
   'debug.stats': (data: unknown) => void;

@@ -15,7 +15,7 @@ import { MemoryMatchQueue } from './adapters/memory/memory-match-queue.repositor
       provide: STORAGE_TOKENS.UserRepository,
       useFactory: (configService: ConfigService) => {
         const driver = configService.get<string>('STORAGE_DRIVER', 'memory');
-        
+
         switch (driver) {
           case 'postgres':
             // TODO: Implement PostgresUserRepository
@@ -28,12 +28,12 @@ import { MemoryMatchQueue } from './adapters/memory/memory-match-queue.repositor
       inject: [ConfigService],
     },
 
-    // Battle Repository  
+    // Battle Repository
     {
       provide: STORAGE_TOKENS.BattleRepository,
       useFactory: (configService: ConfigService) => {
         const driver = configService.get<string>('STORAGE_DRIVER', 'memory');
-        
+
         switch (driver) {
           case 'postgres':
             // TODO: Implement PostgresBattleRepository
@@ -51,7 +51,7 @@ import { MemoryMatchQueue } from './adapters/memory/memory-match-queue.repositor
       provide: STORAGE_TOKENS.MatchQueue,
       useFactory: (configService: ConfigService) => {
         const driver = configService.get<string>('STORAGE_DRIVER', 'memory');
-        
+
         switch (driver) {
           case 'postgres':
             // TODO: Could use Redis or Postgres for queue
@@ -69,7 +69,7 @@ import { MemoryMatchQueue } from './adapters/memory/memory-match-queue.repositor
       provide: STORAGE_TOKENS.UnitOfWork,
       useFactory: (configService: ConfigService) => {
         const driver = configService.get<string>('STORAGE_DRIVER', 'memory');
-        
+
         switch (driver) {
           case 'postgres':
             // TODO: Implement PostgresUnitOfWork

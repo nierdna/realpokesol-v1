@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { IUnitOfWork, TransactionContext } from '../../ports/unit-of-work.interface';
+import {
+  IUnitOfWork,
+  TransactionContext,
+} from '../../ports/unit-of-work.interface';
 import { MemoryUserRepository } from './memory-user.repository';
 import { MemoryBattleRepository } from './memory-battle.repository';
 
@@ -10,7 +13,9 @@ export class MemoryUnitOfWork implements IUnitOfWork {
     private battleRepo: MemoryBattleRepository,
   ) {}
 
-  async withTransaction<T>(fn: (tx: TransactionContext) => Promise<T>): Promise<T> {
+  async withTransaction<T>(
+    fn: (tx: TransactionContext) => Promise<T>,
+  ): Promise<T> {
     // For memory adapter, we don't have real transactions
     // But we can provide the same interface for consistency
     const context: TransactionContext = {

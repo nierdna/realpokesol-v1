@@ -23,8 +23,10 @@ export class SimpleAuthService {
   generateChallenge(walletAddress: string): SimpleAuthChallenge {
     const nonce = this.generateNonce();
     const issuedAt = new Date().toISOString();
-    const expirationTime = new Date(Date.now() + this.nonceValidityMs).toISOString();
-    
+    const expirationTime = new Date(
+      Date.now() + this.nonceValidityMs,
+    ).toISOString();
+
     const message = this.buildSimpleMessage(walletAddress, nonce, issuedAt);
 
     return {
@@ -69,7 +71,6 @@ export class SimpleAuthService {
       }
 
       return { valid: true };
-
     } catch (error) {
       this.logger.error('Simple auth verification error:', error);
       return { valid: false, reason: 'VERIFICATION_ERROR' };
@@ -79,7 +80,11 @@ export class SimpleAuthService {
   /**
    * Build simple authentication message
    */
-  private buildSimpleMessage(walletAddress: string, nonce: string, issuedAt: string): string {
+  private buildSimpleMessage(
+    walletAddress: string,
+    nonce: string,
+    issuedAt: string,
+  ): string {
     return `Welcome to ${this.appName}!\n\nPlease sign this message to authenticate your wallet.\n\nWallet: ${walletAddress}\nNonce: ${nonce}\nTime: ${issuedAt}`;
   }
 
@@ -88,14 +93,17 @@ export class SimpleAuthService {
    */
   private generateNonce(): string {
     return Array.from(nacl.randomBytes(16))
-      .map(b => b.toString(16).padStart(2, '0'))
+      .map((b) => b.toString(16).padStart(2, '0'))
       .join('');
   }
 
   /**
    * Validate message format
    */
-  private validateMessageFormat(message: string, expectedWallet: string): boolean {
+  private validateMessageFormat(
+    message: string,
+    expectedWallet: string,
+  ): boolean {
     try {
       // Clean up message first
       const cleanMessage = message
@@ -105,13 +113,12 @@ export class SimpleAuthService {
         .trim();
 
       // Check if message contains expected components (try both original and cleaned)
-      const checkMessage = (msg: string) => (
+      const checkMessage = (msg: string) =>
         msg.includes(this.appName) &&
         msg.includes('authenticate your wallet') &&
         msg.includes(`Wallet: ${expectedWallet}`) &&
         msg.includes('Nonce:') &&
-        msg.includes('Time:')
-      );
+        msg.includes('Time:');
 
       return checkMessage(message) || checkMessage(cleanMessage);
     } catch (error) {
@@ -123,7 +130,10 @@ export class SimpleAuthService {
   /**
    * Validate time window
    */
-  private validateTimeWindow(issuedAt: string): { valid: boolean; reason?: string } {
+  private validateTimeWindow(issuedAt: string): {
+    valid: boolean;
+    reason?: string;
+  } {
     try {
       const now = Date.now();
       const issued = new Date(issuedAt).getTime();
@@ -165,8 +175,8 @@ export class SimpleAuthService {
 
       // Clean up message - handle escaped characters from frontend
       const cleanMessage = message
-        .replace(/\\n/g, '\n')  // Replace \\n with actual newlines
-        .replace(/\\r/g, '\r')  // Replace \\r with actual carriage returns
+        .replace(/\\n/g, '\n') // Replace \\n with actual newlines
+        .replace(/\\r/g, '\r') // Replace \\r with actual carriage returns
         .replace(/\\\\/g, '\\') // Replace \\\\ with single backslash
         .trim();
 
@@ -189,12 +199,20 @@ export class SimpleAuthService {
       const cleanedMessageBytes = new TextEncoder().encode(cleanMessage);
 
       // Try original message first
-      let isValid = nacl.sign.detached.verify(originalMessageBytes, signatureBytes, publicKey);
+      let isValid = nacl.sign.detached.verify(
+        originalMessageBytes,
+        signatureBytes,
+        publicKey,
+      );
       this.logger.log(`Original message verification: ${isValid}`);
 
       // If original fails, try cleaned message
       if (!isValid) {
-        isValid = nacl.sign.detached.verify(cleanedMessageBytes, signatureBytes, publicKey);
+        isValid = nacl.sign.detached.verify(
+          cleanedMessageBytes,
+          signatureBytes,
+          publicKey,
+        );
         this.logger.log(`Cleaned message verification: ${isValid}`);
       }
 

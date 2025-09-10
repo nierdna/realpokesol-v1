@@ -1,7 +1,10 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { IBattleRepository } from '../storage/ports/battle-repository.interface';
-import { Battle, BattleState } from '../storage/ports/battle-repository.interface';
+import {
+  Battle,
+  BattleState,
+} from '../storage/ports/battle-repository.interface';
 import { STORAGE_TOKENS } from '../storage/tokens';
 import { UserService } from '../user/user.service';
 import { randomUUID } from 'crypto';
@@ -27,7 +30,7 @@ export interface BattleEndResult {
 export class BattleService {
   private readonly logger = new Logger(BattleService.name);
   private readonly battleTimeoutMs: number;
-  
+
   // Track battle timeouts and processed actions
   private battleTimeouts = new Map<string, NodeJS.Timeout>();
   private processedActions = new Map<string, Set<string>>(); // battleId -> Set<requestId>
@@ -38,13 +41,18 @@ export class BattleService {
     private userService: UserService,
     private configService: ConfigService,
   ) {
-    this.battleTimeoutMs = this.configService.get<number>('BATTLE_TIMEOUT_SECONDS', 60) * 1000;
+    this.battleTimeoutMs =
+      this.configService.get<number>('BATTLE_TIMEOUT_SECONDS', 60) * 1000;
   }
 
   /**
    * Create new battle
    */
-  async createBattle(player1Id: string, player2Id: string, roomId: string): Promise<Battle> {
+  async createBattle(
+    player1Id: string,
+    player2Id: string,
+    roomId: string,
+  ): Promise<Battle> {
     const player1 = await this.userService.findById(player1Id);
     const player2 = await this.userService.findById(player2Id);
 
@@ -53,7 +61,8 @@ export class BattleService {
     }
 
     const currentTurn = Math.random() > 0.5 ? 'player1' : 'player2'; // Random first turn
-    const firstPlayerName = currentTurn === 'player1' ? player1.nickname : player2.nickname;
+    const firstPlayerName =
+      currentTurn === 'player1' ? player1.nickname : player2.nickname;
 
     const battle: Battle = {
       id: roomId,
@@ -65,7 +74,7 @@ export class BattleService {
       createdAt: new Date(),
       log: [
         `Battle started: ${player1.nickname} vs ${player2.nickname}`,
-        `${firstPlayerName} goes first!`
+        `${firstPlayerName} goes first!`,
       ],
     };
 
@@ -73,7 +82,9 @@ export class BattleService {
     this.processedActions.set(roomId, new Set());
     this.setBattleTimeout(roomId);
 
-    this.logger.log(`Battle created: ${roomId} - ${player1.nickname} vs ${player2.nickname}`);
+    this.logger.log(
+      `Battle created: ${roomId} - ${player1.nickname} vs ${player2.nickname}`,
+    );
     return battle;
   }
 
@@ -106,7 +117,8 @@ export class BattleService {
         maxHp: player2.creature.maxHp,
         level: player2.creature.level,
       },
-      currentTurnOwnerId: battle.currentTurn === 'player1' ? battle.player1Id : battle.player2Id,
+      currentTurnOwnerId:
+        battle.currentTurn === 'player1' ? battle.player1Id : battle.player2Id,
       turnCount: battle.turnCount,
     };
   }
@@ -115,10 +127,10 @@ export class BattleService {
    * Process battle action (attack)
    */
   async processAction(
-    battleId: string, 
-    userId: string, 
+    battleId: string,
+    userId: string,
     action: 'attack',
-    requestId: string
+    requestId: string,
   ): Promise<BattleTurnResult | null> {
     // Check for duplicate requestId (idempotency)
     const processedSet = this.processedActions.get(battleId);
@@ -132,7 +144,8 @@ export class BattleService {
     }
 
     // Verify it's the user's turn
-    const currentTurnUserId = battle.currentTurn === 'player1' ? battle.player1Id : battle.player2Id;
+    const currentTurnUserId =
+      battle.currentTurn === 'player1' ? battle.player1Id : battle.player2Id;
     if (currentTurnUserId !== userId) {
       return null; // Not user's turn
     }
@@ -147,7 +160,8 @@ export class BattleService {
 
     // Get players
     const attacker = await this.userService.findById(userId);
-    const defenderId = userId === battle.player1Id ? battle.player2Id : battle.player1Id;
+    const defenderId =
+      userId === battle.player1Id ? battle.player2Id : battle.player1Id;
     const defender = await this.userService.findById(defenderId);
 
     if (!attacker || !defender) {
@@ -177,7 +191,8 @@ export class BattleService {
       await this.endBattle(battleId, winnerId);
     } else {
       // Switch turns
-      const newCurrentTurn = battle.currentTurn === 'player1' ? 'player2' : 'player1';
+      const newCurrentTurn =
+        battle.currentTurn === 'player1' ? 'player2' : 'player1';
       await this.battleRepository.update(battleId, {
         currentTurn: newCurrentTurn,
         turnCount: battle.turnCount + 1,
@@ -185,9 +200,11 @@ export class BattleService {
     }
 
     // Determine next turn owner
-    const nextTurnOwnerId = battleEnded 
-      ? userId 
-      : (userId === battle.player1Id ? battle.player2Id : battle.player1Id);
+    const nextTurnOwnerId = battleEnded
+      ? userId
+      : userId === battle.player1Id
+        ? battle.player2Id
+        : battle.player1Id;
 
     return {
       damage: finalDamage,
@@ -204,20 +221,24 @@ export class BattleService {
   /**
    * End battle and handle rewards/penalties
    */
-  async endBattle(battleId: string, winnerId: string): Promise<BattleEndResult> {
+  async endBattle(
+    battleId: string,
+    winnerId: string,
+  ): Promise<BattleEndResult> {
     const battle = await this.battleRepository.get(battleId);
     if (!battle) {
       throw new Error(`Battle not found: ${battleId}`);
     }
 
-    const loserId = winnerId === battle.player1Id ? battle.player2Id : battle.player1Id;
-    
+    const loserId =
+      winnerId === battle.player1Id ? battle.player2Id : battle.player1Id;
+
     // End battle in repository
     await this.battleRepository.endBattle(battleId, winnerId);
 
     // Level up winner
     await this.userService.levelUp(winnerId);
-    
+
     // Faint and revive loser
     await this.userService.faintCreature(loserId);
     await this.userService.reviveCreature(loserId);
@@ -256,11 +277,16 @@ export class BattleService {
     }
 
     // Current turn owner loses due to AFK
-    const afkUserId = battle.currentTurn === 'player1' ? battle.player1Id : battle.player2Id;
-    const winnerId = afkUserId === battle.player1Id ? battle.player2Id : battle.player1Id;
+    const afkUserId =
+      battle.currentTurn === 'player1' ? battle.player1Id : battle.player2Id;
+    const winnerId =
+      afkUserId === battle.player1Id ? battle.player2Id : battle.player1Id;
 
-    await this.battleRepository.appendLog(battleId, `${afkUserId} timed out - AFK loss`);
-    
+    await this.battleRepository.appendLog(
+      battleId,
+      `${afkUserId} timed out - AFK loss`,
+    );
+
     const result = await this.endBattle(battleId, winnerId);
     result.reason = 'AFK_TIMEOUT';
 
@@ -271,7 +297,9 @@ export class BattleService {
   /**
    * Handle user reconnection during battle
    */
-  async handleReconnect(userId: string): Promise<{ battleId: string; battleState: BattleState } | null> {
+  async handleReconnect(
+    userId: string,
+  ): Promise<{ battleId: string; battleState: BattleState } | null> {
     // Find active battle for user
     const battle = await this.battleRepository.findByPlayerId(userId);
     if (!battle || battle.state !== 'active') {
@@ -284,7 +312,7 @@ export class BattleService {
     }
 
     this.logger.log(`User ${userId} reconnected to battle ${battle.id}`);
-    
+
     return {
       battleId: battle.id,
       battleState,
@@ -320,7 +348,7 @@ export class BattleService {
    */
   async getStats() {
     const activeBattles = await this.battleRepository.listActive();
-    
+
     return {
       activeBattles: activeBattles.length,
       activeTimeouts: this.battleTimeouts.size,
@@ -335,7 +363,8 @@ export class BattleService {
     // Find and end any active battle
     const battle = await this.battleRepository.findByPlayerId(userId);
     if (battle && battle.state === 'active') {
-      const winnerId = userId === battle.player1Id ? battle.player2Id : battle.player1Id;
+      const winnerId =
+        userId === battle.player1Id ? battle.player2Id : battle.player1Id;
       await this.endBattle(battle.id, winnerId);
       this.logger.log(`Battle force-ended due to disconnect: ${battle.id}`);
     }

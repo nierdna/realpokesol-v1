@@ -4,7 +4,11 @@ import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import { NonceService } from './nonce.service';
 import { SimpleAuthService } from './simple-auth.service';
-import { SiwsRequest, SiwsResponse, SessionRecord } from './interfaces/nonce.interface';
+import {
+  SiwsRequest,
+  SiwsResponse,
+  SessionRecord,
+} from './interfaces/nonce.interface';
 import type { IUserRepository } from '../storage/ports/user-repository.interface';
 import { User } from '../storage/ports/user-repository.interface';
 import { STORAGE_TOKENS } from '../storage/tokens';
@@ -31,10 +35,10 @@ export class AuthService {
    */
   generateNonce(wallet: string) {
     const challenge = this.simpleAuthService.generateChallenge(wallet);
-    
+
     // Store nonce for validation later
     this.nonceService.generateNonce(wallet, challenge.nonce);
-    
+
     return {
       nonce: challenge.nonce,
       domain: this.configService.get<string>('DOMAIN', 'pokemon-arena.local'),
@@ -52,7 +56,11 @@ export class AuthService {
     const { wallet, message, signature } = siwsRequest;
 
     // 1. Verify simple auth signature and message
-    const authResult = await this.simpleAuthService.verifySignature(wallet, message, signature);
+    const authResult = await this.simpleAuthService.verifySignature(
+      wallet,
+      message,
+      signature,
+    );
     if (!authResult.valid) {
       throw new Error(`Simple auth verification failed: ${authResult.reason}`);
     }
@@ -62,9 +70,12 @@ export class AuthService {
     if (!nonceMatch) {
       throw new Error('Nonce not found in message');
     }
-    
+
     const nonce = nonceMatch[1];
-    const nonceResult = this.nonceService.validateAndConsumeNonce(nonce, wallet);
+    const nonceResult = this.nonceService.validateAndConsumeNonce(
+      nonce,
+      wallet,
+    );
     if (!nonceResult.valid) {
       throw new Error(`Nonce validation failed: ${nonceResult.reason}`);
     }
@@ -150,8 +161,10 @@ export class AuthService {
    */
   private async createUser(wallet: string): Promise<User> {
     const userId = randomUUID();
-    const nickname = `Player${Math.floor(Math.random() * 9999).toString().padStart(4, '0')}`;
-    
+    const nickname = `Player${Math.floor(Math.random() * 9999)
+      .toString()
+      .padStart(4, '0')}`;
+
     const user: User = {
       id: userId,
       nickname,
@@ -184,11 +197,16 @@ export class AuthService {
     const unit = match[2];
 
     switch (unit) {
-      case 's': return value * 1000;
-      case 'm': return value * 60 * 1000;
-      case 'h': return value * 60 * 60 * 1000;
-      case 'd': return value * 24 * 60 * 60 * 1000;
-      default: return 60 * 60 * 1000;
+      case 's':
+        return value * 1000;
+      case 'm':
+        return value * 60 * 1000;
+      case 'h':
+        return value * 60 * 60 * 1000;
+      case 'd':
+        return value * 24 * 60 * 60 * 1000;
+      default:
+        return 60 * 60 * 1000;
     }
   }
 

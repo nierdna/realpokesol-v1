@@ -5,7 +5,11 @@ import type { IMatchQueue } from '../storage/ports/match-queue.interface';
 import { STORAGE_TOKENS } from '../storage/tokens';
 import { UserService } from '../user/user.service';
 import { MATCH_EVENTS } from './events/match.events';
-import type { MatchCreatedEvent, MatchTimeoutEvent, MatchQueueJoinedEvent } from './events/match.events';
+import type {
+  MatchCreatedEvent,
+  MatchTimeoutEvent,
+  MatchQueueJoinedEvent,
+} from './events/match.events';
 import { randomUUID } from 'crypto';
 
 export interface MatchResult {
@@ -28,7 +32,7 @@ export interface MatchResult {
 export class MatchmakingService {
   private readonly logger = new Logger(MatchmakingService.name);
   private readonly matchTimeoutMs: number;
-  
+
   // Track timeouts for users in queue
   private queueTimeouts = new Map<string, NodeJS.Timeout>();
 
@@ -39,7 +43,8 @@ export class MatchmakingService {
     private configService: ConfigService,
     private eventEmitter: EventEmitter2,
   ) {
-    this.matchTimeoutMs = this.configService.get<number>('MATCH_TIMEOUT_SECONDS', 60) * 1000;
+    this.matchTimeoutMs =
+      this.configService.get<number>('MATCH_TIMEOUT_SECONDS', 60) * 1000;
   }
 
   /**
@@ -58,14 +63,16 @@ export class MatchmakingService {
 
     // Add to queue (idempotent)
     await this.matchQueue.join(userId);
-    
+
     // Set timeout for this user
     this.setQueueTimeout(userId);
 
     const position = await this.matchQueue.getPosition(userId);
     const queueStats = await this.matchQueue.getStats();
 
-    this.logger.log(`User ${user.nickname} joined queue at position ${position}`);
+    this.logger.log(
+      `User ${user.nickname} joined queue at position ${position}`,
+    );
 
     // ✅ Emit queue joined event instead of calling tryCreateMatch
     this.eventEmitter.emit(MATCH_EVENTS.MATCH_QUEUE_JOINED, {
@@ -94,7 +101,7 @@ export class MatchmakingService {
   async tryCreateMatch(): Promise<MatchResult | null> {
     // Get next 2 players using fairness algorithm
     const candidates = await this.matchQueue.getNext(2);
-    
+
     if (candidates.length < 2) {
       return null; // Not enough players
     }
@@ -139,7 +146,7 @@ export class MatchmakingService {
     };
 
     this.logger.log(
-      `Match created: ${roomId} - ${player1.nickname} vs ${player2.nickname}`
+      `Match created: ${roomId} - ${player1.nickname} vs ${player2.nickname}`,
     );
 
     // ✅ Emit match created event
@@ -156,7 +163,7 @@ export class MatchmakingService {
    */
   async handleQueueTimeout(userId: string): Promise<void> {
     await this.leaveQueue(userId);
-    
+
     const user = await this.userService.findById(userId);
     this.logger.log(`Queue timeout for user: ${user?.nickname || userId}`);
 
@@ -207,7 +214,7 @@ export class MatchmakingService {
    */
   async getStats() {
     const queueStats = await this.matchQueue.getStats();
-    
+
     return {
       queue: queueStats,
       activeTimeouts: this.queueTimeouts.size,

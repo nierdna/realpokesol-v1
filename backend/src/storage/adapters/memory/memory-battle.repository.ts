@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { IBattleRepository, Battle } from '../../ports/battle-repository.interface';
+import {
+  IBattleRepository,
+  Battle,
+} from '../../ports/battle-repository.interface';
 
 @Injectable()
 export class MemoryBattleRepository implements IBattleRepository {
@@ -9,12 +12,14 @@ export class MemoryBattleRepository implements IBattleRepository {
 
   async create(battle: Battle): Promise<void> {
     this.battles.set(battle.id, { ...battle, log: [...battle.log] });
-    
+
     // Update player battle index
     this.playerBattleIndex.set(battle.player1Id, battle.id);
     this.playerBattleIndex.set(battle.player2Id, battle.id);
-    
-    this.logger.log(`Battle created: ${battle.id} (${battle.player1Id} vs ${battle.player2Id})`);
+
+    this.logger.log(
+      `Battle created: ${battle.id} (${battle.player1Id} vs ${battle.player2Id})`,
+    );
   }
 
   async get(id: string): Promise<Battle | null> {
@@ -65,7 +70,7 @@ export class MemoryBattleRepository implements IBattleRepository {
       this.playerBattleIndex.delete(battle.player1Id);
       this.playerBattleIndex.delete(battle.player2Id);
     }
-    
+
     this.battles.delete(id);
     this.logger.log(`Battle deleted: ${id}`);
   }

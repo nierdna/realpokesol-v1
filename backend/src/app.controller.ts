@@ -23,12 +23,13 @@ export class AppController {
   @Get('health')
   async getHealth() {
     try {
-      const [userStats, lobbyStats, matchStats, battleStats] = await Promise.all([
-        this.userService.getStats(),
-        this.lobbyService.getStats(),
-        this.matchmakingService.getStats(),
-        this.battleService.getStats(),
-      ]);
+      const [userStats, lobbyStats, matchStats, battleStats] =
+        await Promise.all([
+          this.userService.getStats(),
+          this.lobbyService.getStats(),
+          this.matchmakingService.getStats(),
+          this.battleService.getStats(),
+        ]);
 
       return {
         status: 'healthy',

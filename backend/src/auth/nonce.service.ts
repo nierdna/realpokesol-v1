@@ -10,9 +10,13 @@ export class NonceService {
   private readonly domain: string;
 
   constructor(private configService: ConfigService) {
-    this.nonceTtlMs = this.configService.get<number>('NONCE_TTL_SECONDS', 300) * 1000;
-    this.domain = this.configService.get<string>('DOMAIN', 'pokemon-arena.local');
-    
+    this.nonceTtlMs =
+      this.configService.get<number>('NONCE_TTL_SECONDS', 300) * 1000;
+    this.domain = this.configService.get<string>(
+      'DOMAIN',
+      'pokemon-arena.local',
+    );
+
     // Cleanup expired nonces every minute
     setInterval(() => this.cleanupExpiredNonces(), 60000);
   }
@@ -50,7 +54,10 @@ export class NonceService {
   /**
    * Validate and consume a nonce
    */
-  validateAndConsumeNonce(nonce: string, wallet: string): { valid: boolean; reason?: string } {
+  validateAndConsumeNonce(
+    nonce: string,
+    wallet: string,
+  ): { valid: boolean; reason?: string } {
     const nonceRecord = this.nonces.get(nonce);
 
     if (!nonceRecord) {

@@ -21,16 +21,23 @@ export class SiwsService {
   private readonly clockSkewMs = 5 * 60 * 1000; // 5 minutes
 
   constructor(private configService: ConfigService) {
-    this.domain = this.configService.get<string>('DOMAIN', 'pokemon-arena.local');
+    this.domain = this.configService.get<string>(
+      'DOMAIN',
+      'pokemon-arena.local',
+    );
   }
 
   /**
    * Verify SIWS signature and message
    */
-  verifySiws(wallet: string, message: string, signature: string): { 
-    valid: boolean; 
-    reason?: string; 
-    parsedMessage?: SiwsMessage 
+  verifySiws(
+    wallet: string,
+    message: string,
+    signature: string,
+  ): {
+    valid: boolean;
+    reason?: string;
+    parsedMessage?: SiwsMessage;
   } {
     try {
       // 1. Parse message
@@ -63,7 +70,6 @@ export class SiwsService {
       }
 
       return { valid: true, parsedMessage };
-
     } catch (error) {
       this.logger.error('SIWS verification error:', error);
       return { valid: false, reason: 'VERIFICATION_ERROR' };
@@ -87,7 +93,9 @@ export class SiwsService {
       }
 
       // Check if wallet is on the same line or next line
-      let walletMatch = lines[0].match(/sign in with your Solana account:\s*([A-Za-z0-9]+)/);
+      let walletMatch = lines[0].match(
+        /sign in with your Solana account:\s*([A-Za-z0-9]+)/,
+      );
       if (!walletMatch && lines[1]) {
         // Try to find wallet on the second line
         const walletLine = lines[1].trim();
@@ -99,7 +107,10 @@ export class SiwsService {
 
       // Parse key-value pairs
       // Start from line 2 if wallet is on separate line, otherwise line 1
-      const startLine = lines[1] && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(lines[1].trim()) ? 2 : 1;
+      const startLine =
+        lines[1] && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(lines[1].trim())
+          ? 2
+          : 1;
 
       for (let i = startLine; i < lines.length; i++) {
         const line = lines[i].trim();
@@ -147,9 +158,12 @@ export class SiwsService {
   /**
    * Validate message has required fields
    */
-  private validateMessageStructure(message: SiwsMessage): { valid: boolean; reason?: string } {
+  private validateMessageStructure(message: SiwsMessage): {
+    valid: boolean;
+    reason?: string;
+  } {
     const requiredFields = ['domain', 'nonce', 'issuedAt', 'expirationTime'];
-    
+
     for (const field of requiredFields) {
       if (!message[field]) {
         return { valid: false, reason: `MISSING_FIELD_${field.toUpperCase()}` };
@@ -162,7 +176,10 @@ export class SiwsService {
   /**
    * Validate time window (issued at and expiration time)
    */
-  private validateTimeWindow(message: SiwsMessage): { valid: boolean; reason?: string } {
+  private validateTimeWindow(message: SiwsMessage): {
+    valid: boolean;
+    reason?: string;
+  } {
     try {
       const now = Date.now();
       const issuedAt = new Date(message.issuedAt).getTime();
@@ -197,14 +214,18 @@ export class SiwsService {
   /**
    * Verify Ed25519 signature
    */
-  private verifySignature(wallet: string, message: string, signature: string): boolean {
+  private verifySignature(
+    wallet: string,
+    message: string,
+    signature: string,
+  ): boolean {
     try {
       // Decode wallet public key from base58
       const publicKey = bs58.decode(wallet);
-      
+
       // Decode signature from base64
       const signatureBytes = Buffer.from(signature, 'base64');
-      
+
       // Encode message as UTF-8
       const messageBytes = new TextEncoder().encode(message);
 
@@ -219,7 +240,12 @@ export class SiwsService {
   /**
    * Generate SIWS message template
    */
-  generateMessageTemplate(wallet: string, nonce: string, issuedAt: string, expirationTime: string): string {
+  generateMessageTemplate(
+    wallet: string,
+    nonce: string,
+    issuedAt: string,
+    expirationTime: string,
+  ): string {
     return [
       `Pokémon Summon Arena wants you to sign in with your Solana account:`,
       wallet,
@@ -230,7 +256,7 @@ export class SiwsService {
       `Nonce: ${nonce}`,
       `Issued At: ${issuedAt}`,
       `Expiration Time: ${expirationTime}`,
-      `Version: 1`
+      `Version: 1`,
     ].join('\n');
   }
 }

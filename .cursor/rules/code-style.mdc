@@ -1,7 +1,5 @@
 ---
-description: 
-globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 - Always use `"` instead of `'` for string literals.
 - Use `camelCase` for variable names.
