@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
 import { socketManager } from '@/lib/socket/socket-manager';
-import { randomUUID } from 'crypto';
+import { generateUUID } from '@/lib/utils/uuid';
 
 interface BattleState {
   p1: { id: string; hp: number; maxHp: number; level: number };
@@ -394,7 +394,7 @@ export class BattleScene extends Phaser.Scene {
   private performAttack() {
     if (!this.isMyTurn) return;
 
-    const requestId = randomUUID();
+    const requestId = generateUUID();
     socketManager.emit('battle.action', {
       action: 'attack',
       requestId,
