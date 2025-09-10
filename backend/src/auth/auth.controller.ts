@@ -52,7 +52,9 @@ export class AuthController {
         data: result,
       };
     } catch (error) {
-      this.logger.error(`Nonce generation error: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error(
+        `Nonce generation error: ${error instanceof Error ? error.message : String(error)}`,
+      );
       throw new HttpException(
         {
           success: false,
@@ -89,12 +91,17 @@ export class AuthController {
         data: result,
       };
     } catch (error) {
-      this.logger.error(`SIWS verification error: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error(
+        `SIWS verification error: ${error instanceof Error ? error.message : String(error)}`,
+      );
       throw new HttpException(
         {
           success: false,
           error: 'SIWS_VERIFICATION_FAILED',
-          message: error instanceof Error ? error.message : 'Failed to verify SIWS signature',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Failed to verify SIWS signature',
         },
         HttpStatus.UNAUTHORIZED,
       );
@@ -126,12 +133,17 @@ export class AuthController {
         data: result,
       };
     } catch (error) {
-      this.logger.error(`Simple auth verification error: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error(
+        `Simple auth verification error: ${error instanceof Error ? error.message : String(error)}`,
+      );
       throw new HttpException(
         {
           success: false,
           error: 'AUTH_VERIFICATION_FAILED',
-          message: error instanceof Error ? error.message : 'Failed to verify authentication signature',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Failed to verify authentication signature',
         },
         HttpStatus.UNAUTHORIZED,
       );
@@ -183,7 +195,9 @@ export class AuthController {
         throw error;
       }
 
-      this.logger.error(`Token validation error: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error(
+        `Token validation error: ${error instanceof Error ? error.message : String(error)}`,
+      );
       throw new HttpException(
         {
           success: false,
@@ -208,7 +222,9 @@ export class AuthController {
         data: stats,
       };
     } catch (error) {
-      this.logger.error(`Stats retrieval error: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error(
+        `Stats retrieval error: ${error instanceof Error ? error.message : String(error)}`,
+      );
       throw new HttpException(
         {
           success: false,

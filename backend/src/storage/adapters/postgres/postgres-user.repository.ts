@@ -8,7 +8,7 @@ import {
 
 @Injectable()
 export class PostgresUserRepository implements IUserRepository {
-  constructor(private prisma: PrismaClient) { }
+  constructor(private prisma: PrismaClient) {}
 
   async findById(userId: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
@@ -70,8 +70,10 @@ export class PostgresUserRepository implements IUserRepository {
       updateData.posX = patch.position.x;
       updateData.posY = patch.position.y;
     }
-    if (patch.isInBattle !== undefined) updateData.isInBattle = patch.isInBattle;
-    if (patch.lastLoginAt !== undefined) updateData.lastLoginAt = patch.lastLoginAt;
+    if (patch.isInBattle !== undefined)
+      updateData.isInBattle = patch.isInBattle;
+    if (patch.lastLoginAt !== undefined)
+      updateData.lastLoginAt = patch.lastLoginAt;
 
     if (Object.keys(updateData).length > 0) {
       await this.prisma.user.update({
@@ -101,13 +103,15 @@ export class PostgresUserRepository implements IUserRepository {
     return users.map((user: any) => ({
       id: user.id,
       nickname: user.nickname,
-      creature: user.creature ? {
-        name: user.creature.name,
-        hp: user.creature.hp,
-        maxHp: user.creature.maxHp,
-        level: user.creature.level,
-        isFainted: user.creature.isFainted,
-      } : null,
+      creature: user.creature
+        ? {
+            name: user.creature.name,
+            hp: user.creature.hp,
+            maxHp: user.creature.maxHp,
+            level: user.creature.level,
+            isFainted: user.creature.isFainted,
+          }
+        : null,
       position: { x: user.posX, y: user.posY },
     }));
   }
@@ -165,13 +169,15 @@ export class PostgresUserRepository implements IUserRepository {
       nickname: user.nickname,
       socketId: user.socketId,
       position: { x: user.posX, y: user.posY },
-      creature: user.creature ? {
-        name: user.creature.name,
-        hp: user.creature.hp,
-        maxHp: user.creature.maxHp,
-        level: user.creature.level,
-        isFainted: user.creature.isFainted,
-      } : null,
+      creature: user.creature
+        ? {
+            name: user.creature.name,
+            hp: user.creature.hp,
+            maxHp: user.creature.maxHp,
+            level: user.creature.level,
+            isFainted: user.creature.isFainted,
+          }
+        : null,
       isInBattle: user.isInBattle,
       createdAt: user.createdAt,
       lastLoginAt: user.lastLoginAt,

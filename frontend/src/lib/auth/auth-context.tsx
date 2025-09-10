@@ -1,9 +1,15 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { siwsClient } from "./siws-client";
-import { socketManager } from '../socket/socket-manager';
+import { socketManager } from "../socket/socket-manager";
 
 interface User {
   id: string;
@@ -44,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    */
   const signIn = async () => {
     if (!wallet.connected || !wallet.publicKey) {
-      setError('Please connect your wallet first');
+      setError("Please connect your wallet first");
       return;
     }
 
@@ -69,9 +75,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       console.log("✅ Authentication successful:", result.user.nickname);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Authentication failed';
+      const errorMessage =
+        err instanceof Error ? err.message : "Authentication failed";
       setError(errorMessage);
-      console.error('🔥 Authentication error:', err);
+      console.error("🔥 Authentication error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -91,18 +98,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     // Clear localStorage
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
 
-    console.log('✅ Signed out successfully');
+    console.log("✅ Signed out successfully");
   };
 
   /**
    * Try to restore session from localStorage
    */
   useEffect(() => {
-    const storedToken = localStorage.getItem('accessToken');
-    const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem("accessToken");
+    const storedUser = localStorage.getItem("user");
 
     if (storedToken && storedUser) {
       try {
@@ -116,13 +123,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Validate session with server
         validateSession(storedToken).catch((err) => {
-          console.error('🔥 Session validation failed:', err);
+          console.error("🔥 Session validation failed:", err);
           signOut();
         });
 
-        console.log('✅ Session restored:', parsedUser.nickname);
+        console.log("✅ Session restored:", parsedUser.nickname);
       } catch (err) {
-        console.error('🔥 Session restoration failed:', err);
+        console.error("🔥 Session restoration failed:", err);
         signOut();
       }
     }
@@ -133,17 +140,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    */
   const validateSession = async (token: string): Promise<void> => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/validate`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/validate`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Session validation failed');
+        throw new Error("Session validation failed");
       }
     } catch (error) {
-      console.error('Session validation error:', error);
+      console.error("Session validation error:", error);
       throw error;
     }
   };
@@ -156,7 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Add delay to allow wallet to reconnect after page reload
       const timeoutId = setTimeout(() => {
         if (!wallet.connected && isAuthenticated) {
-          console.log('🔄 Wallet disconnected, signing out...');
+          console.log("🔄 Wallet disconnected, signing out...");
           signOut();
         }
       }, 2000); // 2 second delay
@@ -175,17 +185,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

@@ -1,14 +1,14 @@
 sequenceDiagram
-    participant C as Client/Frontend
-    participant W as Wallet
-    participant AS as Auth Service
-    participant GW as Game Gateway
-    participant BS as Battle Service
-    participant BE as Battle Engine
-    participant DB as Database
+participant C as Client/Frontend
+participant W as Wallet
+participant AS as Auth Service
+participant GW as Game Gateway
+participant BS as Battle Service
+participant BE as Battle Engine
+participant DB as Database
 
     Note over C,DB: 1. AUTHENTICATION FLOW
-    
+
     C->>W: Connect Wallet
     W-->>C: Wallet Connected (publicKey)
     C->>AS: GET /auth/nonce?publicKey={key}
@@ -25,7 +25,7 @@ sequenceDiagram
     C->>C: Store token in auth context
 
     Note over C,DB: 2. WEBSOCKET CONNECTION
-    
+
     C->>GW: Connect WebSocket with auth token
     GW->>GW: Verify JWT token
     GW->>DB: Fetch user by token payload
@@ -34,7 +34,7 @@ sequenceDiagram
     GW-->>C: 'connected' event { user }
 
     Note over C,DB: 3. LOBBY JOIN
-    
+
     C->>GW: 'joinLobby' event
     GW->>GW: Add socket to 'lobby' room
     GW->>GW: Get current lobby users
@@ -42,7 +42,7 @@ sequenceDiagram
     GW-->>C: 'userJoinedLobby' event to others
 
     Note over C,DB: 4. MATCHMAKING
-    
+
     C->>GW: 'findMatch' event
     GW->>GW: Check for waiting players
     alt No waiting players
@@ -63,7 +63,7 @@ sequenceDiagram
     end
 
     Note over C,DB: 5. BATTLE EXECUTION
-    
+
     C->>GW: 'battleAction' event { battleId, action }
     GW->>BS: processBattleAction(battleId, playerId, action)
     BS->>BE: processAction(battleState, playerId, action)
@@ -75,9 +75,9 @@ sequenceDiagram
     DB-->>BS: Battle updated
     BS-->>GW: Updated battle state
     GW-->>C: 'battleStateUpdate' event (to both players)
-    
+
     Note over C,DB: 6. BATTLE COMPLETION
-    
+
     alt Battle ends
         BE->>BE: Set battle as complete
         BE->>BE: Determine winner

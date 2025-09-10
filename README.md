@@ -6,7 +6,7 @@ A Pokemon-themed PvP turn-based 2D game with Solana authentication.
 
 - **Frontend**: Next.js 15 + Phaser 3 + Socket.io client + Solana wallet adapter
 - **Backend**: NestJS + Socket.io + Storage Adapter (Memory → Postgres)
-- **Authentication**: Sign-In with Solana (SIWS) 
+- **Authentication**: Sign-In with Solana (SIWS)
 - **Package Manager**: pnpm
 
 ## Project Structure
@@ -31,6 +31,7 @@ pokemon-arena-mvp/
 
 1. Clone the repository
 2. Copy environment configuration:
+
    ```bash
    cp env.example .env
    ```
@@ -43,11 +44,13 @@ pokemon-arena-mvp/
 ### Development
 
 Start both backend and frontend in development mode:
+
 ```bash
 pnpm run dev
 ```
 
 Or run them separately:
+
 ```bash
 # Backend (NestJS)
 pnpm run dev:backend
@@ -98,6 +101,7 @@ Check `DEVELOPMENT_PLAN.md` for detailed development roadmap and current progres
 See `env.example` for all available configuration options.
 
 Key variables:
+
 - `STORAGE_DRIVER`: `memory` (MVP) or `postgres` (Final)
 - `JWT_SECRET`: Secret for JWT token signing
 - `CORS_ORIGINS`: Allowed origins for CORS

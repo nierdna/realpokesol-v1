@@ -41,7 +41,8 @@ interface AuthenticatedSocket extends Socket {
   pingTimeout: 20000,
 })
 export class SocketGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 

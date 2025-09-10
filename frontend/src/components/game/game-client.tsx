@@ -1,24 +1,26 @@
-'use client';
+"use client";
 
-import dynamic from 'next/dynamic';
-import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth/auth-context';
+import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth/auth-context";
 
 // Dynamically import PhaserGame to avoid SSR issues
 const PhaserGame = dynamic(
-  () => import('./phaser-game').then(mod => ({ default: mod.PhaserGame })),
-  { 
+  () => import("./phaser-game").then((mod) => ({ default: mod.PhaserGame })),
+  {
     ssr: false,
     loading: () => (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 mx-auto mb-4"></div>
-          <p className="text-xl text-purple-400 font-semibold">Loading Game Engine...</p>
+          <p className="text-xl text-purple-400 font-semibold">
+            Loading Game Engine...
+          </p>
         </div>
       </div>
-    )
-  }
+    ),
+  },
 );
 
 export default function GameClient() {
@@ -30,7 +32,7 @@ export default function GameClient() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/');
+      router.push("/");
       return;
     }
   }, [isAuthenticated, router]);
@@ -57,10 +59,10 @@ export default function GameClient() {
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-400">HP:</span>
               <div className="bg-gray-700 rounded-full h-2 w-20 overflow-hidden">
-                <div 
+                <div
                   className="bg-green-500 h-full transition-all duration-300"
-                  style={{ 
-                    width: `${(user.creature.hp / user.creature.maxHp) * 100}%` 
+                  style={{
+                    width: `${(user.creature.hp / user.creature.maxHp) * 100}%`,
                   }}
                 />
               </div>
@@ -74,14 +76,14 @@ export default function GameClient() {
 
       {/* Back to Home Button */}
       <button
-        onClick={() => router.push('/')}
+        onClick={() => router.push("/")}
         className="absolute top-4 right-4 z-10 bg-gray-800/80 backdrop-blur-sm hover:bg-gray-700/80 px-4 py-2 rounded-lg text-sm transition-colors"
       >
         ← Back to Home
       </button>
 
       {/* Phaser Game Canvas */}
-      <PhaserGame 
+      <PhaserGame
         onGameLoaded={() => setGameLoaded(true)}
         user={user}
         gameRef={gameRef}
@@ -92,8 +94,12 @@ export default function GameClient() {
         <div className="absolute inset-0 bg-black flex items-center justify-center z-20">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 mx-auto mb-4"></div>
-            <p className="text-xl text-purple-400 font-semibold">Loading Arena...</p>
-            <p className="text-gray-500 mt-2">Preparing your Pokémon adventure</p>
+            <p className="text-xl text-purple-400 font-semibold">
+              Loading Arena...
+            </p>
+            <p className="text-gray-500 mt-2">
+              Preparing your Pokémon adventure
+            </p>
           </div>
         </div>
       )}

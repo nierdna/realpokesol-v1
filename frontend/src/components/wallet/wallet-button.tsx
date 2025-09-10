@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import React from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 export function WalletButton() {
   return (
@@ -19,7 +19,8 @@ export function WalletInfo() {
 
   return (
     <div className="text-sm text-gray-600">
-      Connected: {publicKey.toBase58().slice(0, 8)}...{publicKey.toBase58().slice(-8)}
+      Connected: {publicKey.toBase58().slice(0, 8)}...
+      {publicKey.toBase58().slice(-8)}
     </div>
   );
 }

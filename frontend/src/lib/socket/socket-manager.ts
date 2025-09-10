@@ -101,29 +101,29 @@ class SocketManager {
   private setupDefaultListeners(): void {
     if (!this.socket) return;
 
-    this.socket.on('connect', () => {
-      console.log('✅ Socket connected:', this.socket!.id);
+    this.socket.on("connect", () => {
+      console.log("✅ Socket connected:", this.socket!.id);
     });
 
-    this.socket.on('disconnect', (reason) => {
-      console.log('❌ Socket disconnected:', reason);
+    this.socket.on("disconnect", (reason) => {
+      console.log("❌ Socket disconnected:", reason);
     });
 
-    this.socket.on('connect_error', (error) => {
-      console.error('🔥 Socket connection error:', error);
+    this.socket.on("connect_error", (error) => {
+      console.error("🔥 Socket connection error:", error);
     });
 
-    this.socket.on('error', (error) => {
-      console.error('🔥 Socket error:', error);
+    this.socket.on("error", (error) => {
+      console.error("🔥 Socket error:", error);
     });
 
-    this.socket.on('replaced', (data) => {
-      console.log('🔄 Session replaced:', data.message);
+    this.socket.on("replaced", (data) => {
+      console.log("🔄 Session replaced:", data.message);
       // Handle session replacement (user opened new tab)
     });
 
-    this.socket.on('connected', (data) => {
-      console.log('✅ Authentication successful:', data);
+    this.socket.on("connected", (data) => {
+      console.log("✅ Authentication successful:", data);
     });
   }
 

@@ -36,7 +36,9 @@ import { PostgresUnitOfWork } from './adapters/postgres/postgres-unit-of-work';
         switch (driver) {
           case 'postgres':
             if (!prisma) {
-              throw new Error('PrismaService not available for Postgres adapter');
+              throw new Error(
+                'PrismaService not available for Postgres adapter',
+              );
             }
             return new PostgresUserRepository(prisma);
           case 'memory':
@@ -56,7 +58,9 @@ import { PostgresUnitOfWork } from './adapters/postgres/postgres-unit-of-work';
         switch (driver) {
           case 'postgres':
             if (!prisma) {
-              throw new Error('PrismaService not available for Postgres adapter');
+              throw new Error(
+                'PrismaService not available for Postgres adapter',
+              );
             }
             return new PostgresBattleRepository(prisma);
           case 'memory':
@@ -93,14 +97,16 @@ import { PostgresUnitOfWork } from './adapters/postgres/postgres-unit-of-work';
         configService: ConfigService,
         prisma?: PrismaService,
         userRepo?: MemoryUserRepository,
-        battleRepo?: MemoryBattleRepository
+        battleRepo?: MemoryBattleRepository,
       ) => {
         const driver = configService.get<string>('STORAGE_DRIVER', 'memory');
 
         switch (driver) {
           case 'postgres':
             if (!prisma) {
-              throw new Error('PrismaService not available for Postgres UnitOfWork');
+              throw new Error(
+                'PrismaService not available for Postgres UnitOfWork',
+              );
             }
             return new PostgresUnitOfWork(prisma);
           case 'memory':
@@ -108,11 +114,16 @@ import { PostgresUnitOfWork } from './adapters/postgres/postgres-unit-of-work';
             // For memory, create a simple unit of work with existing repos
             return new MemoryUnitOfWork(
               userRepo || new MemoryUserRepository(),
-              battleRepo || new MemoryBattleRepository()
+              battleRepo || new MemoryBattleRepository(),
             );
         }
       },
-      inject: [ConfigService, PrismaService, STORAGE_TOKENS.UserRepository, STORAGE_TOKENS.BattleRepository],
+      inject: [
+        ConfigService,
+        PrismaService,
+        STORAGE_TOKENS.UserRepository,
+        STORAGE_TOKENS.BattleRepository,
+      ],
     },
   ],
   exports: [
