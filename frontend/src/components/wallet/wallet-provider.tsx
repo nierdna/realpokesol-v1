@@ -38,10 +38,12 @@ export const WalletContextProvider: FC<Props> = ({ children }) => {
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect={false}>
-        <WalletModalProvider>
-          {children}
-        </WalletModalProvider>
+      <WalletProvider 
+        wallets={wallets} 
+        autoConnect={true}
+        localStorageKey="walletName"
+      >
+        <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
   );

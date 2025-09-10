@@ -110,9 +110,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAccessToken(storedToken);
         setUser(parsedUser);
 
-        // Try to reconnect socket
+        // Try to reconnect socket and validate session
         socketManager.create(storedToken);
         socketManager.connect();
+
+        // Validate session with server
+        validateSession(storedToken).catch((err) => {
+          console.error('🔥 Session validation failed:', err);
+          signOut();
+        });
 
         console.log('✅ Session restored:', parsedUser.nickname);
       } catch (err) {
@@ -123,11 +129,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /**
-   * Clear auth when wallet disconnects
+   * Validate session with server
+   */
+  const validateSession = async (token: string): Promise<void> => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/validate`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Session validation failed');
+      }
+    } catch (error) {
+      console.error('Session validation error:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * Clear auth when wallet disconnects (with delay to avoid race condition)
    */
   useEffect(() => {
     if (!wallet.connected && isAuthenticated) {
-      signOut();
+      // Add delay to allow wallet to reconnect after page reload
+      const timeoutId = setTimeout(() => {
+        if (!wallet.connected && isAuthenticated) {
+          console.log('🔄 Wallet disconnected, signing out...');
+          signOut();
+        }
+      }, 2000); // 2 second delay
+
+      return () => clearTimeout(timeoutId);
     }
   }, [wallet.connected, isAuthenticated]);
 

@@ -7,6 +7,7 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  Headers,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SiwsDto } from './dto/auth.dto';
@@ -50,8 +51,8 @@ export class AuthController {
         success: true,
         data: result,
       };
-    } catch (error: any) {
-      this.logger.error(`Nonce generation error: ${error?.message || error}`);
+    } catch (error) {
+      this.logger.error(`Nonce generation error: ${error instanceof Error ? error.message : String(error)}`);
       throw new HttpException(
         {
           success: false,
@@ -87,16 +88,13 @@ export class AuthController {
         success: true,
         data: result,
       };
-    } catch (error: any) {
-      this.logger.error(
-        `SIWS verification error: ${error?.message || error}`,
-      );
+    } catch (error) {
+      this.logger.error(`SIWS verification error: ${error instanceof Error ? error.message : String(error)}`);
       throw new HttpException(
         {
           success: false,
           error: 'SIWS_VERIFICATION_FAILED',
-          message:
-            error?.message || 'Failed to verify SIWS signature',
+          message: error instanceof Error ? error.message : 'Failed to verify SIWS signature',
         },
         HttpStatus.UNAUTHORIZED,
       );
@@ -127,16 +125,70 @@ export class AuthController {
         success: true,
         data: result,
       };
-    } catch (error: any) {
-      this.logger.error(
-        `Simple auth verification error: ${error?.message || error}`,
-      );
+    } catch (error) {
+      this.logger.error(`Simple auth verification error: ${error instanceof Error ? error.message : String(error)}`);
       throw new HttpException(
         {
           success: false,
           error: 'AUTH_VERIFICATION_FAILED',
-          message:
-            error?.message || 'Failed to verify authentication signature',
+          message: error instanceof Error ? error.message : 'Failed to verify authentication signature',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+  }
+
+  /**
+   * Validate existing JWT token
+   * GET /auth/validate
+   */
+  @Get('validate')
+  async validateToken(@Headers('authorization') authorization?: string) {
+    try {
+      if (!authorization || !authorization.startsWith('Bearer ')) {
+        throw new HttpException(
+          {
+            success: false,
+            error: 'NO_TOKEN',
+            message: 'Authorization token required',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      const token = authorization.replace('Bearer ', '');
+      const user = await this.authService.verifyToken(token);
+      
+      if (!user) {
+        throw new HttpException(
+          {
+            success: false,
+            error: 'INVALID_TOKEN',
+            message: 'Invalid or expired token',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      this.logger.log(`Token validation successful for user: ${user.id}`);
+      return {
+        success: true,
+        data: {
+          valid: true,
+          user,
+        },
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      
+      this.logger.error(`Token validation error: ${error instanceof Error ? error.message : String(error)}`);
+      throw new HttpException(
+        {
+          success: false,
+          error: 'TOKEN_VALIDATION_FAILED',
+          message: 'Invalid token',
         },
         HttpStatus.UNAUTHORIZED,
       );
@@ -155,8 +207,8 @@ export class AuthController {
         success: true,
         data: stats,
       };
-    } catch (error: any) {
-      this.logger.error(`Stats retrieval error: ${error?.message || error}`);
+    } catch (error) {
+      this.logger.error(`Stats retrieval error: ${error instanceof Error ? error.message : String(error)}`);
       throw new HttpException(
         {
           success: false,
