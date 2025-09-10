@@ -5,6 +5,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { NonceService } from './nonce.service';
 import { SimpleAuthService } from './simple-auth.service';
+import { SiwsService } from './siws.service';
 import { StorageModule } from '../storage/storage.module';
 
 @Module({
@@ -23,7 +24,7 @@ import { StorageModule } from '../storage/storage.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, NonceService, SimpleAuthService],
+  providers: [AuthService, NonceService, SimpleAuthService, SiwsService],
   exports: [AuthService],
 })
 export class AuthModule {}

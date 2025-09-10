@@ -76,20 +76,30 @@ export class UserService {
       throw new Error(`User not found: ${userId}`);
     }
 
+    const defaultCreature = {
+      name: 'Starter Pokemon',
+      hp: 55,
+      maxHp: 55,
+      level: 1,
+      isFainted: false,
+    };
+
+    const currentCreature = user.creature || defaultCreature;
+
     const updatedCreature = {
-      ...user.creature,
+      ...currentCreature,
       ...updates,
       // Ensure HP is within bounds
       hp: Math.max(
         0,
-        Math.min(updates.hp ?? user.creature.hp, user.creature.maxHp),
+        Math.min(updates?.hp ?? currentCreature.hp, currentCreature.maxHp),
       ),
       // Ensure level is within bounds
-      level: Math.max(1, Math.min(100, updates.level ?? user.creature.level)),
+      level: Math.max(1, Math.min(100, updates?.level ?? currentCreature.level)),
     };
 
     // Recalculate maxHp if level changed
-    if (updates.level && updates.level !== user.creature.level) {
+    if (updates?.level && updates.level !== currentCreature.level) {
       updatedCreature.maxHp = 50 + updatedCreature.level * 5;
       // If HP is higher than new maxHp, cap it
       updatedCreature.hp = Math.min(updatedCreature.hp, updatedCreature.maxHp);
@@ -108,7 +118,7 @@ export class UserService {
       throw new Error(`User not found: ${userId}`);
     }
 
-    const newLevel = Math.min(100, user.creature.level + 1);
+    const newLevel = Math.min(100, (user.creature?.level || 1) + 1);
     await this.updateCreature(userId, { level: newLevel });
 
     this.logger.log(`User ${userId} leveled up to ${newLevel}`);

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { simpleAuthClient } from './simple-auth-client';
+import { siwsClient } from "./siws-client";
 import { socketManager } from '../socket/socket-manager';
 
 interface User {
@@ -52,23 +52,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      // Complete simple auth flow
-      const result = await simpleAuthClient.completeAuthFlow(wallet);
-      
+      // Complete SIWS flow
+      const result = await siwsClient.completeSiwsFlow(wallet);
+
       // Store auth data
       setAccessToken(result.accessToken);
       setUser(result.user);
-      
+
       // Store in localStorage for persistence
-      localStorage.setItem('accessToken', result.accessToken);
-      localStorage.setItem('user', JSON.stringify(result.user));
+      localStorage.setItem("accessToken", result.accessToken);
+      localStorage.setItem("user", JSON.stringify(result.user));
 
       // Create socket connection
       socketManager.create(result.accessToken);
       socketManager.connect();
 
-      console.log('✅ Authentication successful:', result.user.nickname);
-
+      console.log("✅ Authentication successful:", result.user.nickname);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Authentication failed';
       setError(errorMessage);

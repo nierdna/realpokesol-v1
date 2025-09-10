@@ -36,20 +36,21 @@
 
 ---
 
-## Phase 2: Authentication System (2-3 ngày) 🚧
+## Phase 2: Authentication System (2-3 ngày) ✅
 
 ### 2.1 SIWS Implementation
-- [ ] Nonce generation endpoint (`GET /auth/nonce`)
-- [ ] SIWS verification logic với Ed25519
-- [ ] JWT token issuance
-- [ ] Message template chuẩn SIWS
-- [ ] Rate limiting cho auth endpoints
+- [x] Nonce generation endpoint (`GET /auth/nonce`)
+- [x] SIWS verification logic với Ed25519
+- [x] JWT token issuance
+- [x] Message template chuẩn SIWS
+- [x] Rate limiting cho auth endpoints
+- [x] Both `/auth/siws` và `/auth/verify` endpoints (SRS compliance + backward compatibility)
 
 ### 2.2 Socket Authentication
-- [ ] JWT verification middleware
-- [ ] Socket handshake authentication
-- [ ] Single-session policy (kick duplicate connections)
-- [ ] Connection lifecycle management
+- [x] JWT verification middleware
+- [x] Socket handshake authentication
+- [x] Single-session policy (kick duplicate connections)
+- [x] Connection lifecycle management
 
 ---
 
@@ -152,17 +153,20 @@
 
 ---
 
-## Phase 7: Integration & Testing (2-3 ngày) ⏳
+## Phase 7: Integration & Testing (2-3 ngày) 🚧
 
 ### 7.1 Contract Testing
-- [ ] Repository contract tests
-- [ ] Memory vs Postgres adapter tests
+- [x] Repository contract tests (Memory adapter working)
+- [ ] Memory vs Postgres adapter tests (Postgres adapters need completion)
 - [ ] Transaction boundary tests
 
 ### 7.2 E2E Testing
-- [ ] Authentication flow testing
-- [ ] Multiplayer scenarios
-- [ ] Battle system testing
+- [x] Authentication flow testing (SIWS working)
+- [x] Backend services integration (all services implemented)
+- [x] Socket.io connection và authentication
+- [x] Frontend-backend API compatibility (fixed API prefix issue)
+- [ ] Multiplayer scenarios (need live testing)
+- [ ] Battle system testing (need live testing)
 - [ ] Reconnection scenarios
 - [ ] AFK và timeout testing
 
@@ -214,9 +218,16 @@
 ## Current Focus
 
 **Active Phase**: Phase 7 - Integration & Testing 🚧
-**Current Task**: Ready to test full end-to-end gameplay flow
-**Next Milestone**: Complete integration testing và performance validation
+**Current Task**: Live testing multiplayer scenarios và battle system
+**Next Milestone**: Complete Phase 7 và move to Phase 8 (Polish & Deployment)
 **Blocking Issues**: None
+
+**Recent Progress**:
+- ✅ Fixed auth endpoints compatibility (added `/auth/siws` endpoint)
+- ✅ Fixed frontend API URL với global prefix `/api`
+- ✅ Environment configuration setup
+- ✅ Both backend và frontend running successfully
+- ✅ Authentication endpoints tested và working
 
 **Completed Phases**: 
 - ✅ **Phase 1**: Monorepo structure, NestJS backend, Next.js frontend, dependencies installed

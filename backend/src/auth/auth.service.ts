@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import { NonceService } from './nonce.service';
 import { SimpleAuthService } from './simple-auth.service';
+import { SiwsService } from './siws.service';
 import {
   SiwsRequest,
   SiwsResponse,
@@ -23,6 +24,7 @@ export class AuthService {
     private configService: ConfigService,
     private nonceService: NonceService,
     private simpleAuthService: SimpleAuthService,
+    private siwsService: SiwsService,
     @Inject(STORAGE_TOKENS.UserRepository)
     private userRepository: IUserRepository,
   ) {
@@ -31,9 +33,26 @@ export class AuthService {
   }
 
   /**
-   * Generate simple auth challenge for wallet
+   * Generate SIWS nonce for wallet (SRS compliant)
    */
   generateNonce(wallet: string) {
+    // Generate nonce using nonce service
+    const nonceData = this.nonceService.generateNonce(wallet);
+    const domain = this.configService.get<string>('DOMAIN', 'pokemon-arena.local');
+
+    return {
+      nonce: nonceData.nonce,
+      domain: domain,
+      statement: 'Sign in to Pokémon Summon Arena',
+      issuedAt: nonceData.issuedAt,
+      expirationTime: nonceData.expirationTime,
+    };
+  }
+
+  /**
+   * Generate simple auth challenge for wallet (backward compatibility)
+   */
+  generateSimpleChallenge(wallet: string) {
     const challenge = this.simpleAuthService.generateChallenge(wallet);
 
     // Store nonce for validation later
@@ -55,18 +74,18 @@ export class AuthService {
   async verifySiws(siwsRequest: SiwsRequest): Promise<SiwsResponse> {
     const { wallet, message, signature } = siwsRequest;
 
-    // 1. Verify simple auth signature and message
-    const authResult = await this.simpleAuthService.verifySignature(
+    // 1. Verify SIWS signature and message
+    const authResult = await this.siwsService.verifySiws(
       wallet,
       message,
       signature,
     );
     if (!authResult.valid) {
-      throw new Error(`Simple auth verification failed: ${authResult.reason}`);
+      throw new Error(`SIWS verification failed: ${authResult.reason}`);
     }
 
     // 2. Extract nonce from message and validate
-    const nonceMatch = message.match(/Nonce: ([a-f0-9]+)/);
+    const nonceMatch = message.match(/Nonce: ([a-f0-9-]+)/);
     if (!nonceMatch) {
       throw new Error('Nonce not found in message');
     }
@@ -125,7 +144,13 @@ export class AuthService {
         id: user.id,
         nickname: user.nickname,
         walletAddress: user.walletAddress,
-        creature: user.creature,
+        creature: user.creature || {
+          name: 'Starter Pokemon',
+          hp: 55,
+          maxHp: 55,
+          level: 1,
+          isFainted: false,
+        },
       },
     };
   }

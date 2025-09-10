@@ -10,7 +10,7 @@ export interface User {
     maxHp: number;
     level: number;
     isFainted: boolean;
-  };
+  } | null;
   isInBattle: boolean;
   createdAt: Date;
   lastLoginAt?: Date;

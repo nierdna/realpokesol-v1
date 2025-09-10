@@ -1,5 +1,5 @@
 ---
-alwaysApply: false
+alwaysApply: true
 ---
 - Always use `"` instead of `'` for string literals.
 - Use `camelCase` for variable names.

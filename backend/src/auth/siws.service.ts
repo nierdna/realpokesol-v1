@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nacl from 'tweetnacl';
-const bs58 = require('bs58');
 
 export interface SiwsMessage {
   domain: string;
@@ -30,15 +29,15 @@ export class SiwsService {
   /**
    * Verify SIWS signature and message
    */
-  verifySiws(
+  async verifySiws(
     wallet: string,
     message: string,
     signature: string,
-  ): {
+  ): Promise<{
     valid: boolean;
     reason?: string;
     parsedMessage?: SiwsMessage;
-  } {
+  }> {
     try {
       // 1. Parse message
       const parsedMessage = this.parseMessage(message);
@@ -64,7 +63,7 @@ export class SiwsService {
       }
 
       // 5. Verify Ed25519 signature
-      const signatureValid = this.verifySignature(wallet, message, signature);
+      const signatureValid = await this.verifySignature(wallet, message, signature);
       if (!signatureValid) {
         return { valid: false, reason: 'INVALID_SIGNATURE' };
       }
@@ -214,14 +213,17 @@ export class SiwsService {
   /**
    * Verify Ed25519 signature
    */
-  private verifySignature(
+  private async verifySignature(
     wallet: string,
     message: string,
     signature: string,
-  ): boolean {
+  ): Promise<boolean> {
     try {
+      // Dynamic import for bs58
+      const bs58 = await import('bs58');
+
       // Decode wallet public key from base58
-      const publicKey = bs58.decode(wallet);
+      const publicKey = bs58.default.decode(wallet);
 
       // Decode signature from base64
       const signatureBytes = Buffer.from(signature, 'base64');

@@ -139,7 +139,7 @@ export class SocketGateway
         user: {
           id: user.id,
           nickname: user.nickname,
-          level: user.creature.level,
+          level: user.creature?.level || 1,
         },
         timestamp: new Date().toISOString(),
       });

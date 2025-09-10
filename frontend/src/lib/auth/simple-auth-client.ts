@@ -29,7 +29,7 @@ export class SimpleAuthClient {
   private readonly apiUrl: string;
 
   constructor() {
-    this.apiUrl = process.env.NEXT_PUBLIC_API_URL!;
+    this.apiUrl = process.env.NEXT_PUBLIC_API_URL! + '/api';
   }
 
   /**

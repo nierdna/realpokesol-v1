@@ -32,7 +32,7 @@ export interface SiwsResponse {
       maxHp: number;
       level: number;
       isFainted: boolean;
-    };
+    } | null;
   };
 }
 

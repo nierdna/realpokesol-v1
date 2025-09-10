@@ -80,7 +80,7 @@ export class MemoryUserRepository implements IUserRepository {
       throw new Error(`User not found: ${userId}`);
     }
 
-    user.creature = { ...creature };
+    user.creature = creature;
     this.users.set(userId, user);
   }
 

@@ -136,12 +136,12 @@ export class MatchmakingService {
       player1: {
         id: player1.id,
         nickname: player1.nickname,
-        level: player1.creature.level,
+        level: player1.creature?.level || 1,
       },
       player2: {
         id: player2.id,
         nickname: player2.nickname,
-        level: player2.creature.level,
+        level: player2.creature?.level || 1,
       },
     };
 

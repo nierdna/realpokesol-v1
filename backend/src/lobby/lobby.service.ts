@@ -59,7 +59,7 @@ export class LobbyService {
       .map((user) => ({
         id: user.id,
         nickname: user.nickname,
-        level: user.creature.level,
+        level: user.creature?.level || 1,
         x: user.position.x,
         y: user.position.y,
         socketId: user.socketId!,

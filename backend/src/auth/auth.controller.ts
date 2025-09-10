@@ -64,7 +64,47 @@ export class AuthController {
   }
 
   /**
-   * Verify simple auth signature
+   * Verify SIWS signature (SRS specification compliant)
+   * POST /auth/siws
+   */
+  @Post('siws')
+  async verifySiws(@Body() siwsDto: SiwsDto) {
+    try {
+      this.logger.log(
+        `SIWS verification requested for wallet: ${siwsDto.wallet}`,
+      );
+
+      const result = await this.authService.verifySiws({
+        wallet: siwsDto.wallet,
+        message: siwsDto.message,
+        signature: siwsDto.signature,
+      });
+
+      this.logger.log(
+        `SIWS verification successful for wallet: ${siwsDto.wallet}`,
+      );
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error: any) {
+      this.logger.error(
+        `SIWS verification error: ${error?.message || error}`,
+      );
+      throw new HttpException(
+        {
+          success: false,
+          error: 'SIWS_VERIFICATION_FAILED',
+          message:
+            error?.message || 'Failed to verify SIWS signature',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+  }
+
+  /**
+   * Verify simple auth signature (backward compatibility)
    * POST /auth/verify
    */
   @Post('verify')

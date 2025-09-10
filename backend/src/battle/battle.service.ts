@@ -107,15 +107,15 @@ export class BattleService {
     return {
       p1: {
         id: player1.id,
-        hp: player1.creature.hp,
-        maxHp: player1.creature.maxHp,
-        level: player1.creature.level,
+        hp: player1.creature?.hp || 55,
+        maxHp: player1.creature?.maxHp || 55,
+        level: player1.creature?.level || 1,
       },
       p2: {
         id: player2.id,
-        hp: player2.creature.hp,
-        maxHp: player2.creature.maxHp,
-        level: player2.creature.level,
+        hp: player2.creature?.hp || 55,
+        maxHp: player2.creature?.maxHp || 55,
+        level: player2.creature?.level || 1,
       },
       currentTurnOwnerId:
         battle.currentTurn === 'player1' ? battle.player1Id : battle.player2Id,
@@ -174,7 +174,7 @@ export class BattleService {
     const finalDamage = Math.floor(baseDamage * (isCrit ? 1.5 : 1.0));
 
     // Apply damage
-    const newHp = Math.max(0, defender.creature.hp - finalDamage);
+    const newHp = Math.max(0, (defender.creature?.hp || 55) - finalDamage);
     await this.userService.updateCreature(defenderId, { hp: newHp });
 
     // Create log entry
@@ -258,8 +258,8 @@ export class BattleService {
     const result: BattleEndResult = {
       winnerId,
       newLevels: {
-        [winnerId]: winner?.creature.level || 1,
-        [loserId]: loser?.creature.level || 1,
+        [winnerId]: winner?.creature?.level || 1,
+        [loserId]: loser?.creature?.level || 1,
       },
     };
 
