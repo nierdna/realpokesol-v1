@@ -158,7 +158,7 @@ export class AuthController {
 
       const token = authorization.replace('Bearer ', '');
       const user = await this.authService.verifyToken(token);
-      
+
       if (!user) {
         throw new HttpException(
           {
@@ -182,7 +182,7 @@ export class AuthController {
       if (error instanceof HttpException) {
         throw error;
       }
-      
+
       this.logger.error(`Token validation error: ${error instanceof Error ? error.message : String(error)}`);
       throw new HttpException(
         {
